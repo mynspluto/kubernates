@@ -1,0 +1,24 @@
+apiVersion: apps/v1 # Kubernetes API 버전
+kind: Deployment # 리소스 종류: Deployment
+
+metadata: # 메타데이터 섹션 시작
+  name: nodejs-app # 이 Deployment의 이름
+  labels: # 라벨 섹션 시작
+    app: nodejs-app # 라벨: app=nodejs-app
+
+spec: # 스펙 섹션 시작
+  replicas: 1 # 배포할 파드의 수
+  selector: # 선택자 섹션 시작
+    matchLabels: # 일치하는 라벨 섹션 시작
+      app: nodejs-app # 선택할 파드의 라벨: app=nodejs-app
+  template: # 템플릿 섹션 시작
+    metadata: # 템플릿 메타데이터 섹션 시작
+      labels: # 라벨 섹션 시작
+        app: nodejs-app # 파드 템플릿의 라벨: app=nodejs-app
+    spec: # 템플릿 스펙 섹션 시작
+      containers: # 컨테이너 섹션 시작
+        - name: nodejs-app # 컨테이너 이름: nodejs-app
+          image: bitnami/express # 사용할 이미지: bitnami/express
+          ports: # 포트 섹션 시작
+            - name: http # 포트 이름: http
+              containerPort: 3000 # 컨테이너 내부 포트: 3000
