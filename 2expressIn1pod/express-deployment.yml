@@ -22,10 +22,10 @@ spec: # 스펙 섹션 시작
           imagePullPolicy: IfNotPresent
           ports: # 포트 섹션 시작
             - name: http # 포트 이름: http
-              containerPort: 4001 # 컨테이너 내부 포트: 4000
+              containerPort: 4001 # express/bin/www의 포트가 중요
         - name: nodejs-app2 # 컨테이너 이름: nodejs-app
           image: docker.io/library/express2:latest #minikube image load my-express-app2:latest, minikube image ls --format tabl로 가져옴
           imagePullPolicy: IfNotPresent
           ports: # 포트 섹션 시작
             - name: http # 포트 이름: http
-              containerPort: 4002 # 컨테이너 내부 포트: 5000
+              containerPort: 4002 #

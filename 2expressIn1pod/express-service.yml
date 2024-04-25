@@ -9,5 +9,5 @@ spec:
     - protocol: TCP
       #nodePort: 30000
       port: 31000 #kubectl port-forward service/nodejs-app 31000
-      targetPort: 3002 #선택된 파드의 컨테이너 포트
+      targetPort: 3001 #선택된 파드의 컨테이너 포트 express/bin/www의 포트랑 연결해야됨
   type: NodePort
