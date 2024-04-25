@@ -10,11 +10,11 @@ cd express2
 docker build -t express:latest .
 minikube image load express:latest
 
-kubectl apply -f express-deployment.yml
+kubectl apply -f deployment.yml
 
 - 여기서 파드 생성됨, 컨테이너 포트의 역할 모르겠음
 
-kubectl apply -f express-service.yml
+kubectl apply -f service.yml
 kubectl port-forward service/nodejs-app 31000
 127.0.0.1:31000으로 접속
 
