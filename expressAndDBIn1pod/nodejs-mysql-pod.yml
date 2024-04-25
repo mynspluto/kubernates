@@ -5,7 +5,8 @@ metadata:
 spec:
   containers:
     - name: nodejs-app
-      image: bitnami/express
+      image: docker.io/library/express:latest #minikube image ls --format tabl로 가져옴
+      imagePullPolicy: IfNotPresent
       ports:
         - containerPort: 3000
     - name: mysql-app
