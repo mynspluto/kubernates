@@ -18,8 +18,14 @@ spec: # 스펙 섹션 시작
     spec: # 템플릿 스펙 섹션 시작
       containers: # 컨테이너 섹션 시작
         - name: nodejs-app # 컨테이너 이름: nodejs-app
-          image: docker.io/library/my-express-app:latest #minikube image ls --format tabl로 가져옴
+          image: docker.io/library/express:latest #minikube image ls --format tabl로 가져옴
           imagePullPolicy: IfNotPresent
           ports: # 포트 섹션 시작
             - name: http # 포트 이름: http
-              containerPort: 3000 # 컨테이너 내부 포트: 3000
+              containerPort: 4001 # 컨테이너 내부 포트: 4000
+        - name: nodejs-app2 # 컨테이너 이름: nodejs-app
+          image: docker.io/library/express2:latest #minikube image load my-express-app2:latest, minikube image ls --format tabl로 가져옴
+          imagePullPolicy: IfNotPresent
+          ports: # 포트 섹션 시작
+            - name: http # 포트 이름: http
+              containerPort: 4002 # 컨테이너 내부 포트: 5000
