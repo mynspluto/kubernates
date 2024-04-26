@@ -5,7 +5,6 @@ const conn = maria.createConnection({
   port: 3306,
   user: "root",
   password: "dbslzhs90!",
-  database: "kubernetes_express",
 });
 
 module.exports = conn;

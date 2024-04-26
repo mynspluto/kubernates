@@ -18,7 +18,7 @@ spec: # 스펙 섹션 시작
     spec: # 템플릿 스펙 섹션 시작
       containers: # 컨테이너 섹션 시작
         - name: express-container # 컨테이너 이름: nodejs-app
-          image: docker.io/library/express_maria:latest #minikube image ls --format tabl로 가져옴
+          image: docker.io/library/express_db:latest #minikube image ls --format tabl로 가져옴
           imagePullPolicy: IfNotPresent
           ports: # 포트 섹션 시작
             - name: http # 포트 이름: http
