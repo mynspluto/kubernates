@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maria-deployment
+  labels:
+    app: maria-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maria-pod
+  template:
+    metadata:
+      labels:
+        app: maria-pod
+    spec: # 템플릿 스펙 섹션 시작
+      containers: # 컨테이너 섹션 시작
+        - name: maria-container
+          image: mariadb
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: dbslzhs90!
+          ports:
+            - name: http # 포트 이름: http
+              containerPort: 3306
