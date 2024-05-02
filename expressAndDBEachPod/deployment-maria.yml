@@ -25,3 +25,11 @@ spec:
           ports:
             - name: http # 포트 이름: http
               containerPort: 3306
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-storage
+              subPath: mysql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
