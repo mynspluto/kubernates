@@ -41,9 +41,6 @@ service로 pod간 continer간 연결이 안되는 경우 coredns가 kube-system�
 => kubectl get pod -n kube-system
 없는 경우 minikube stop, minikube delete, minikube start로 coredns가 생기게 유도
 
-todo
-mysql을 dockerFile로 만들게함
-mysqld --initialize --datadir=/var/lib/mysql 해당명령어를 통해
-File ./ibdata1: 'open' returned OS error 71. Cannot continue operation 이 에러가 안뜨게함
-그러려면 sh를 작성하여 mysqld --initialize --datadir=/var/lib/mysql를 실행한뒤
-CMD [mysql.start]를 해야할듯
+minikube ssh
+cd /data
+이 위치에 maria-container의 /var/lib/mysql이 복사됨

@@ -16,14 +16,19 @@ spec:
     spec: # 템플릿 스펙 섹션 시작
       containers: # 컨테이너 섹션 시작
         - name: maria-container
-          image: mysql:latest
-          imagePullPolicy: IfNotPresent
+          image: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: dbslzhs90!
+            - name: MYSQL_AUTHENTICATION_PLUGIN
+              value: mysql_native_password
           ports:
             - name: http # 포트 이름: http
               containerPort: 3306
           volumeMounts:
             - mountPath: /var/lib/mysql
               name: mysql-storage
+              subPath: mysql
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
