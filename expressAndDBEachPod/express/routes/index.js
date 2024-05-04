@@ -18,28 +18,16 @@ router.get("/", function (req, res, next) {
 });
 
 router.get("/select", async (req, res, next) => {
-  initializeDatabase()
-    .then(() => {
-      console.log("Database initialization completed.");
-      pool.getConnection((err, connection) => {
-        connection.query("USE kubernetes_express; ", () => {
-          connection.query(
-            "select * from my_table",
-            function (err, rows, fields) {
-              if (!err) {
-                console.log("succ", rows);
-                res.render("select", { data: rows });
-              } else {
-                console.log("err : ", err);
-              }
-            }
-          );
-        });
-      });
-    })
-    .catch((err) => {
-      console.error("Database initialization failed:", err);
+  pool.getConnection((err, connection) => {
+    connection.query("select * from my_table", function (err, rows, fields) {
+      if (!err) {
+        console.log("succ", rows);
+        res.render("select", { data: rows });
+      } else {
+        console.log("err : ", err);
+      }
     });
+  });
 });
 
 async function createDatabase() {

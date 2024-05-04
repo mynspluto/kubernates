@@ -1,6 +1,10 @@
-cd exress
+cd express
 docker build -t express_db_each_pod:latest . --no-cache
 minikube image load express_db_each_pod:latest
+
+cd ../mysql
+docker build -t mysql:latest . --no-cache
+minikube image load mysql:latest
 
 kubectl get deployment
 kubectl delete deployment express-deployment
