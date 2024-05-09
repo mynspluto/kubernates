@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hadoop-deployment
+  name: hadoop
 spec:
   replicas: 1
   selector:
@@ -24,7 +24,7 @@ spec:
       volumes:
         - name: hadoop-data
           persistentVolumeClaim:
-            claimName: hadoop-data-pvc
+            claimName: hadoop-pvc
 
 ---
 apiVersion: v1

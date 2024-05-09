@@ -1,22 +1,24 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: hadoop-data-pv
+  name: hadoop-pv
 spec:
-  capacity:
-    storage: 10Gi
+  storageClassName: hadoop-data
   accessModes:
     - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+  persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /mnt/hadoop-data
+    path: /data/hadoop
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: hadoop-data-pvc
+  name: hadoop-pvc
 spec:
-  volumeName: hadoop-data-pv # PV를 연결합니다.
+  storageClassName: hadoop-data
   accessModes:
     - ReadWriteOnce
   resources:
