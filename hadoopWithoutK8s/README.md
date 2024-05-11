@@ -8,3 +8,7 @@ ssh localhost
 hadoop namenode -format
 start-all.sh
 stop-all.sh
+
+Cluster status : http://localhost:8088
+HDFS status : http://localhost:9870
+Secondary NameNode status : http://localhost:9868
