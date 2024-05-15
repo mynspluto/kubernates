@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hadoop-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hadoop
+  template:
+    metadata:
+      labels:
+        app: hadoop
+    spec:
+      containers:
+        - name: namenode
+          image: yourhubusername/hadoop-namenode:latest
+          ports:
+            - containerPort: 9870
+            - containerPort: 9000
+          volumeMounts:
+            - name: namenode-data-volume
+              mountPath: /hadoop/data # 네임노드 데이터 디렉토리 경로
+        - name: datanode
+          image: yourhubusername/hadoop-datanode:latest
+          ports:
+            - containerPort: 9864
+            - containerPort: 9866
+          volumeMounts:
+            - name: datanode-data-volume
+              mountPath: /hadoop/data # 데이터노드 데이터 디렉토리 경로
+        - name: resourcemanager
+          image: yourhubusername/hadoop-resourcemanager:latest
+          ports:
+            - containerPort: 8088
+        - name: nodemanager
+          image: yourhubusername/hadoop-nodemanager:latest
+          # 다른 설정들을 여기에 추가할 수 있습니다.
+      volumes:
+        - name: namenode-data-volume
+          persistentVolumeClaim:
+            claimName: namenode-data-pvc
+        - name: datanode-data-volume
+          persistentVolumeClaim:
+            claimName: datanode-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hadoop-namenode-service
+spec:
+  selector:
+    app: hadoop
+    name: namenode
+  ports:
+    - protocol: TCP
+      port: 9870
+      targetPort: 9870
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hadoop-datanode-service
+spec:
+  selector:
+    app: hadoop
+    name: datanode
+  ports:
+    - protocol: TCP
+      port: 9864
+      targetPort: 9864
+    - protocol: TCP
+      port: 9866
+      targetPort: 9866
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hadoop-resourcemanager-service
+spec:
+  selector:
+    app: hadoop
+    name: resourcemanager
+  ports:
+    - protocol: TCP
+      port: 8088
+      targetPort: 8088
