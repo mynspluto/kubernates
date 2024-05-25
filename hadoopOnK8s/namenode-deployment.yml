@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hadoop-namenode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hadoop
+      role: namenode
+  template:
+    metadata:
+      labels:
+        app: hadoop
+        role: namenode
+    spec:
+      containers:
+        - name: hadoop-namenode
+          image: docker.io/library/hadoop:latest #minikube image ls --format tabl로 가져옴
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HADOOP_ROLE
+              value: "namenode"
+          ports:
+            - containerPort: 9870
+            - containerPort: 9000
+          volumeMounts:
+            - name: hadoop-config
+              mountPath: /usr/local/hadoop/etc/hadoop
+            - name: hadoop-data
+              mountPath: /usr/local/hadoop/data
+      volumes:
+        - name: hadoop-config
+          configMap:
+            name: hadoop-config
+        - name: hadoop-data
+          persistentVolumeClaim:
+            claimName: hadoop-pvc

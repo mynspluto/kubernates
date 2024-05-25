@@ -3,3 +3,5 @@
 
 expressAndDBIn1pod/express/node_modules
 expressAndDBEachPod/express/node_modules
+
+*.tar.gz
