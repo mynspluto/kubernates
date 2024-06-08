@@ -12,4 +12,4 @@ kubectl apply -f namenode-deployment.yml
 kubectl apply -f namenode-svc.yml
 kubectl port-forward service/hadoop-namenode-service 9870(port: 1234면 1234, 9870이라 9870인거임)
 
-127.0.0.1:9870 접속
+sd 접속
