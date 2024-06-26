@@ -34,3 +34,6 @@ initContainers:
   name: kafka-config
   key: cluster-id
   이런식으로 구현이 가능해보임
+
+https://docs.confluent.io/operator/current/co-quickstart.html#co-quickstart-zk
+참조
