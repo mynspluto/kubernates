@@ -1,39 +1,35 @@
-카프카 사용시 주키퍼를 쓰지 않고 kraft를 쓰는 방향으로 추세가 바뀜
-=> https://docs.confluent.io/platform/current/installation/docker/config-reference.html
+minikube delete
+minikube start --memory 15976
 
-/bin/kafka-storage random-uuid
-변수 에 출력을 할당합니다 CLUSTER_ID.
+helm repo add confluentinc https://packages.confluent.io/helm
+helm repo update
+helm upgrade --install \
+ confluent-operator confluentinc/confluent-for-kubernetes
+kubectl get pods
 
-docker run -d \
---name=kafka-kraft \
--h kafka-kraft \
--p 9101:9101 \
--e KAFKA_NODE_ID=1 \
--e KAFKA_LISTENER_SECURITY_PROTOCOL_MAP='CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT' \
--e KAFKA_ADVERTISED_LISTENERS='PLAINTEXT://kafka-kraft:29092,PLAINTEXT_HOST://localhost:9092' \
--e KAFKA_JMX_PORT=9101 \
--e KAFKA_JMX_HOSTNAME=localhost \
--e KAFKA_PROCESS_ROLES='broker,controller' \
--e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
--e KAFKA_CONTROLLER_QUORUM_VOTERS='1@kafka-kraft:29093' \
--e KAFKA_LISTENERS='PLAINTEXT://kafka-kraft:29092,CONTROLLER://kafka-kraft:29093,PLAINTEXT_HOST://0.0.0.0:9092' \
--e KAFKA_INTER_BROKER_LISTENER_NAME='PLAINTEXT' \
--e KAFKA_CONTROLLER_LISTENER_NAMES='CONTROLLER' \
--e CLUSTER_ID='MkU3OEVBNTcwNTJENDM2Qk' \
-confluentinc/cp-kafka:7.6.1
+kubectl apply -f 1.yml
+kubectl apply -f 2.yml
 
-cluster_id를 명령어를 통해 생성해야하는데
-initContainers:
+kubectl port-forward controlcenter-0 9021:9021
+127.0.0.1:9021 접속(컨트롤센터 웹)
 
-- name: init-cluster-id
-  image: confluentinc/cp-kafka:7.6.1
-  command: - "/bin/sh" - "-c" - "export KAFKA_CLUSTER_ID=$(bin/kafka-storage random-uuid) && echo KAFKA_CLUSTER_ID=$KAFKA_CLUSTER_ID"
-  env: - name: KAFKA_CLUSTER_ID
-  valueFrom:
-  configMapKeyRef:
-  name: kafka-config
-  key: cluster-id
-  이런식으로 구현이 가능해보임
+image pull error 뜨는 경우
+docker pull confluentinc/cp-kafka-rest:7.6.1.arm64 이런식으로 수동으로 받은후
+minikube image load confluentinc/cp-kafka-rest:7.6.1.arm64 하여 이미지 로드
 
-https://docs.confluent.io/operator/current/co-quickstart.html#co-quickstart-zk
-참조
+crashback error 뜨는 경우
+minikube delete
+minikube start --memory 15976 (15976은 도커 데스크탑앱 설정에서 제한되는듯)
+
+replica 1로 바꾸면 에러남
+metadata.namespace바꿔도 에러나는듯
+
+todo
+airflow로 하루에 한번 주가 데이터 수집
+수집한 데이터 하둡으로 저장
+저장했다고 카프카 메시지로 알림
+쿠버네티스에 deployment로 등록된 카프카 소비자가 이를 감지
+하둡으로 저장했던 파일을 스파크를 통해 로드
+전처리를 하여 보조지표 등 필요한 데이터 파싱
+학습
+학습된 모델 하둡으로 저장
