@@ -1,9 +1,10 @@
 executor: CeleryExecutor
 
-airflow:
-  image:
-    repository: apache/airflow
-    tag: 2.3.0
+images:
+  airflow:
+    pullPolicy: Never
+    repository: mynspluto-image
+    tag: latest
 
 web:
   defaultUser:
