@@ -1,25 +1,38 @@
-import datetime
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+from airflow.utils.dates import days_ago
+import yfinance as yf
+import pandas as pd
 
-import pendulum
+# 주가 데이터를 수집할 종목 리스트
+tickers = ['AAPL', 'GOOGL', 'MSFT']
 
-from airflow.models.dag import DAG
-from airflow.operators.empty import EmptyOperator
+# 주가 데이터를 저장할 함수
+def fetch_stock_data(ticker):
+    stock = yf.Ticker(ticker)
+    df = stock.history(period='1d')
+    df.reset_index(inplace=True)
+    df.to_csv(f'/path/to/save/{ticker}.csv', index=False)
 
-now = pendulum.now(tz="UTC")
-now_to_the_hour = (now - datetime.timedelta(0, 0, 0, 0, 0, 3)).replace(minute=0, second=0, microsecond=0)
-START_DATE = now_to_the_hour
-DAG_NAME = "test_dag_v1"
+# DAG 정의
+default_args = {
+    'owner': 'airflow',
+    'start_date': days_ago(1),
+    'retries': 1,
+}
 
 dag = DAG(
-    DAG_NAME,
-    schedule="*/10 * * * *",
-    default_args={"depends_on_past": True},
-    start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
-    catchup=False,
+    'fetch_stock_data',
+    default_args=default_args,
+    description='Fetch stock data from Yahoo Finance',
+    schedule_interval='@daily',
 )
 
-run_this_1 = EmptyOperator(task_id="run_this_1", dag=dag)
-run_this_2 = EmptyOperator(task_id="run_this_2", dag=dag)
-run_this_2.set_upstream(run_this_1)
-run_this_3 = EmptyOperator(task_id="run_this_3", dag=dag)
-run_this_3.set_upstream(run_this_2)
+# PythonOperator를 사용하여 각 종목의 데이터를 수집
+for ticker in tickers:
+    task = PythonOperator(
+        task_id=f'fetch_{ticker}_data',
+        python_callable=fetch_stock_data,
+        op_args=[ticker],
+        dag=dag,
+    )

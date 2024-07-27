@@ -1,2 +1,4 @@
-pendulum
 apache-airflow
+pendulum
+yfinance
+pandas

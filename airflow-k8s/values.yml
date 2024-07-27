@@ -3,7 +3,7 @@ executor: CeleryExecutor
 images:
   airflow:
     pullPolicy: Never
-    repository: mynspluto-image
+    repository: mynspluto-airflow
     tag: latest
 
 web:
