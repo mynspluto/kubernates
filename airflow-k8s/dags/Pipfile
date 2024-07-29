@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 yfinance = "*"
 pandas = "*"
+hdfs = "*"
+confluent-kafka = "*"
 
 [dev-packages]
 
