@@ -1,5 +1,5 @@
-kubectl cp ./test_file.txt hadoop-namenode-5bbb7f4765-xrmvg:/tmp/test_file.txt -n hadoop
+kubectl cp ./test_file.txt hadoop-deployment-97d574559-kxbnn:/tmp/test_file.txt -n hadoop
 
-kubectl exec -it hadoop-namenode-5bbb7f4765-xrmvg -n hadoop -- bin/bash hadoop namenode -format
-kubectl exec -it hadoop-namenode-5bbb7f4765-xrmvg -n hadoop -- hdfs dfs -mkdir -p /airflow/test_data
-kubectl exec -it hadoop-namenode-5bbb7f4765-xrmvg -n hadoop -- hdfs dfs -put /tmp/test_file.txt /airflow/test_data/test_file.txt
+kubectl exec -it hadoop-deployment-97d574559-kxbnn -- bin/bash hadoop namenode -format
+kubectl exec -it hadoop-deployment-97d574559-kxbnn -- hdfs dfs -mkdir -p /airflow/test_data
+kubectl exec -it hadoop-deployment-97d574559-kxbnn -- hdfs dfs -put /tmp/test_file.txt /airflow/test_data/test_file.txt

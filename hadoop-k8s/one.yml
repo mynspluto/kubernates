@@ -32,6 +32,13 @@ kind: ConfigMap
 metadata:
   name: hadoop-config
 data:
+  hadoop-env.sh: |
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64
+    export HDFS_NAMENODE_USER=root
+    export HDFS_SECONDARYNAMENODE_USER=root
+    export HDFS_DATANODE_USER=root
+    export YARN_RESOURCEMANAGER_USER=root
+    export YARN_NODEMANAGER_USER=root
   core-site.xml: |
     <configuration>
       <property>
@@ -41,63 +48,32 @@ data:
     </configuration>
   hdfs-site.xml: |
     <configuration>
-      <property>
-        <name>dfs.datanode.address</name>
-        <value>0.0.0.0:9874</value>
-      </property>
-      <property>
-        <name>dfs.replication</name>
-        <value>1</value>
-      </property>
-      <property>
-        <name>dfs.namenode.name.dir</name>
-        <value>/usr/local/hadoop/data/dfs/namenode</value>
-      </property>
-      <property>
-        <name>dfs.datanode.data.dir</name>
-        <value>/usr/local/hadoop/data/dfs/datanode</value>
-      </property>
-    </configuration>
-  yarn-site.xml: |
-    <configuration>
-      <property>
-        <name>yarn.resourcemanager.hostname</name>
-        <value>localhost</value>
-      </property>
-    </configuration>
-  mapred-site.xml: |
-    <configuration>
-      <property>
-        <name>mapreduce.framework.name</name>
-        <value>yarn</value>
-      </property>
+        <property>
+            <name>dfs.replication</name>
+            <value>1</value>
+        </property>
     </configuration>
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hadoop-namenode
+  name: hadoop-deployment
   namespace: hadoop
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: hadoop
-      role: namenode
   template:
     metadata:
       labels:
         app: hadoop
-        role: namenode
     spec:
       containers:
-        - name: hadoop-namenode
+        - name: hadoop-container
           image: docker.io/library/hadoop:latest #minikube image ls --format tabl로 가져옴
           imagePullPolicy: IfNotPresent
-          env:
-            - name: HADOOP_ROLE
-              value: "namenode"
           ports:
             - containerPort: 9870
             - containerPort: 9000
@@ -115,54 +91,14 @@ spec:
             claimName: hadoop-pvc
 
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hadoop-datanode
-  namespace: hadoop
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: hadoop
-      role: datanode
-  template:
-    metadata:
-      labels:
-        app: hadoop
-        role: datanode
-    spec:
-      containers:
-        - name: hadoop-datanode
-          image: docker.io/library/hadoop:latest #minikube image ls --format tabl로 가져옴
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: HADOOP_ROLE
-              value: "datanode"
-          ports:
-            - containerPort: 9874
-          volumeMounts:
-            - name: hadoop-config
-              mountPath: /usr/local/hadoop/etc/hadoop
-            - name: hadoop-data
-              mountPath: /usr/local/hadoop/data
-      volumes:
-        - name: hadoop-config
-          configMap:
-            name: hadoop-config
-        - name: hadoop-data
-          persistentVolumeClaim:
-            claimName: hadoop-pvc
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: hadoop-namenode-service
+  name: hadoop-service
   namespace: hadoop
 spec:
   selector:
     app: hadoop
-    role: namenode
   ports:
     - name: namenode-http
       protocol: TCP
@@ -172,21 +108,4 @@ spec:
       protocol: TCP
       port: 9000
       targetPort: 9000
-  type: NodePort
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: hadoop-datanode-service
-  namespace: hadoop
-spec:
-  selector:
-    app: hadoop
-    role: datanode
-  ports:
-    - name: datanode
-      protocol: TCP
-      port: 9864
-      targetPort: 9864
   type: NodePort

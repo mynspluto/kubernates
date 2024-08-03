@@ -8,7 +8,7 @@ ENV HADOOP_HOME=/usr/local/hadoop
 
 # Install necessary packages
 RUN apt-get update && \
-    apt-get install -y wget openjdk-8-jdk ssh pdsh rsync && \
+    apt-get install -y wget openjdk-8-jdk ssh pdsh rsync sudo && \
     apt-get clean
 
 RUN echo $(which java)
@@ -17,6 +17,10 @@ RUN ls -al /usr/lib/jvm
 RUN ls -al /usr/lib/jvm/java-8-openjdk-arm64
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64
 ENV PATH=$PATH:$JAVA_HOME/bin
+
+ENV HDFS_NAMENODE_USER=root
+ENV HDFS_SECONDARYNAMENODE_USER=root
+ENV HDFS_DATANODE_USER=root
 # Verify Java installation
 RUN echo "JAVA_HOME is set to $JAVA_HOME" && \
     ls -la $JAVA_HOME
@@ -43,8 +47,19 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     chmod 0600 ~/.ssh/authorized_keys && \
     echo "Host *\n    StrictHostKeyChecking no\n" >> /etc/ssh/ssh_config
 
+RUN echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
+    echo "export HDFS_NAMENODE_USER=root" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
+    echo "export HDFS_SECONDARYNAMENODE_USER=root" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
+    echo "export HDFS_DATANODE_USER=root" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
+    echo "export YARN_RESOURCEMANAGER_USER=root" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
+    echo "export YARN_NODEMANAGER_USER=root" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
+    echo "export PDSH_RCMD_TYPE=ssh" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
+    echo "export PDSH_RCMD_TYPE=ssh" >> ~/.bashrc
+
+RUN $HADOOP_HOME/bin/hdfs namenode -format
+
 # Expose necessary ports
 EXPOSE 9870 9864 8088 8042
 
 # Start SSH service and Hadoop
-CMD ["/usr/local/bin/start-hadoop.sh"]
+CMD ["sh", "-c", "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64 && $HADOOP_HOME/sbin/start-dfs.sh"]
