@@ -42,6 +42,10 @@ data:
   hdfs-site.xml: |
     <configuration>
       <property>
+        <name>dfs.datanode.address</name>
+        <value>0.0.0.0:9874</value>
+      </property>
+      <property>
         <name>dfs.replication</name>
         <value>1</value>
       </property>
@@ -136,7 +140,7 @@ spec:
             - name: HADOOP_ROLE
               value: "datanode"
           ports:
-            - containerPort: 9864
+            - containerPort: 9874
           volumeMounts:
             - name: hadoop-config
               mountPath: /usr/local/hadoop/etc/hadoop

@@ -1,3 +1,6 @@
+minikube ssh
+docker rmi mynspluto-airflow
+
 docker build -t mynspluto-airflow:latest .
 
 minikube image load mynspluto-airflow:latest

@@ -2,3 +2,5 @@ apache-airflow
 pendulum
 yfinance
 pandas
+hdfs
+confluent-kafka

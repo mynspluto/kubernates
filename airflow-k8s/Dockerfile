@@ -20,5 +20,8 @@ RUN ls -l /opt/airflow/dags
 ADD ./dags/ /opt/airflow/dags/
 RUN ls -l /opt/airflow/dags
 
+RUN mkdir -p /opt/airflow/stock_data
+RUN ls -l /opt/airflow/stock_data
+
 RUN mkdir -p /opt/airflow/hi
 RUN ls -l /opt/airflow
