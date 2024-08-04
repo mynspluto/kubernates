@@ -20,7 +20,7 @@ def fetch_stock_data(ticker):
 
 def upload_to_hadoop(local_path, hdfs_path):
     # HDFS 클라이언트 설정
-    client = InsecureClient('http://hadoop-namenode-service.hadoop:9870')
+    client = InsecureClient('http://hadoop-service.hadoop:9870')
     
     #client.makedirs('/home/stock_data')
     

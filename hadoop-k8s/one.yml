@@ -2,7 +2,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: hadoop-pv
-  namespace: hadoop
 spec:
   storageClassName: hadoop-storage
   capacity:
@@ -17,7 +16,6 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: hadoop-pvc
-  namespace: hadoop
 spec:
   storageClassName: hadoop-storage
   accessModes:
@@ -32,13 +30,6 @@ kind: ConfigMap
 metadata:
   name: hadoop-config
 data:
-  hadoop-env.sh: |
-    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64
-    export HDFS_NAMENODE_USER=root
-    export HDFS_SECONDARYNAMENODE_USER=root
-    export HDFS_DATANODE_USER=root
-    export YARN_RESOURCEMANAGER_USER=root
-    export YARN_NODEMANAGER_USER=root
   core-site.xml: |
     <configuration>
       <property>
@@ -55,57 +46,36 @@ data:
     </configuration>
 
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hadoop-deployment
-  namespace: hadoop
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: hadoop
-  template:
-    metadata:
-      labels:
-        app: hadoop
-    spec:
-      containers:
-        - name: hadoop-container
-          image: docker.io/library/hadoop:latest #minikube image ls --format tabl로 가져옴
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 9870
-            - containerPort: 9000
-          volumeMounts:
-            - name: hadoop-config
-              mountPath: /usr/local/hadoop/etc/hadoop
-            - name: hadoop-data
-              mountPath: /usr/local/hadoop/data
-      volumes:
-        - name: hadoop-config
-          configMap:
-            name: hadoop-config
-        - name: hadoop-data
-          persistentVolumeClaim:
-            claimName: hadoop-pvc
-
----
 apiVersion: v1
-kind: Service
+kind: Pod
 metadata:
-  name: hadoop-service
-  namespace: hadoop
+  name: hadoop-pod
+  labels:
+    run: hadoop # Service의 selector와 일치시킵니다.
 spec:
-  selector:
-    app: hadoop
-  ports:
-    - name: namenode-http
-      protocol: TCP
-      port: 9870
-      targetPort: 9870
-    - name: namenode-rpc
-      protocol: TCP
-      port: 9000
-      targetPort: 9000
-  type: NodePort
+  containers:
+    - name: hadoop-container
+      image: docker.io/library/hadoop:latest
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 9870
+        - containerPort: 9000
+      volumeMounts:
+        - name: hadoop-config
+          mountPath: /usr/local/hadoop/etc/hadoop
+        - name: hadoop-data
+          mountPath: /usr/local/hadoop/data
+      resources:
+        requests:
+          memory: "8000Mi"
+          cpu: "300m"
+        limits:
+          memory: "12000Mi"
+          cpu: "600m"
+  volumes:
+    - name: hadoop-config
+      configMap:
+        name: hadoop-config
+    - name: hadoop-data
+      persistentVolumeClaim:
+        claimName: hadoop-pvc
