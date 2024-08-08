@@ -26,27 +26,6 @@ spec:
 
 ---
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hadoop-config
-data:
-  core-site.xml: |
-    <configuration>
-      <property>
-        <name>fs.defaultFS</name>
-        <value>hdfs://localhost:9000</value>
-      </property>
-    </configuration>
-  hdfs-site.xml: |
-    <configuration>
-        <property>
-            <name>dfs.replication</name>
-            <value>1</value>
-        </property>
-    </configuration>
-
----
-apiVersion: v1
 kind: Pod
 metadata:
   name: hadoop-pod
@@ -61,8 +40,6 @@ spec:
         - containerPort: 9870
         - containerPort: 9000
       volumeMounts:
-        - name: hadoop-config
-          mountPath: /usr/local/hadoop/etc/hadoop
         - name: hadoop-data
           mountPath: /usr/local/hadoop/data
       resources:
@@ -73,9 +50,6 @@ spec:
           memory: "12000Mi"
           cpu: "600m"
   volumes:
-    - name: hadoop-config
-      configMap:
-        name: hadoop-config
     - name: hadoop-data
       persistentVolumeClaim:
         claimName: hadoop-pvc

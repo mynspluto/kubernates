@@ -32,6 +32,12 @@ RUN chmod +x ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
 COPY config/hadoop-functions.sh ${HADOOP_HOME}/libexec/hadoop-functions.sh
 RUN chmod +x ${HADOOP_HOME}/libexec/hadoop-functions.sh
 
+COPY config/core-site.xml ${HADOOP_HOME}/etc/hadoop/core-site.xml
+RUN chmod +x ${HADOOP_HOME}/etc/hadoop/core-site.xml
+
+COPY config/core-site.xml ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
+RUN chmod +x ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
+
 RUN mkdir -p $HADOOP_HOME/data/dfs/namenode && \
     mkdir -p $HADOOP_HOME/data/dfs/datanode && \
     chmod -R 777 $HADOOP_HOME
