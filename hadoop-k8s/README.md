@@ -1,5 +1,6 @@
 kubectl create namespace hadoop
 kubectl config set-context --current --namespace=hadoop
+docker system prune -a
 
 kubectl delete all --all -n hadoop (pv, pvc는 안지워짐)
 kubectl delete pvc --all -n hadoop

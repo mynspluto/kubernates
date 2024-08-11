@@ -1,6 +1,7 @@
 kubectl create namespace airflow
 kubectl config set-context --current --namespace=airflow
 helm uninstall airflow -n airflow
+docker system prune -a
 minikube ssh
 docker rmi mynspluto-airflow
 
