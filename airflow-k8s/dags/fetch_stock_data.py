@@ -20,7 +20,7 @@ def fetch_stock_data(ticker):
 
 def upload_to_hadoop(local_path, hdfs_path):
     # HDFS 클라이언트 설정
-    client = InsecureClient('http://hadoop-service.hadoop:9870')
+    client = InsecureClient('http://hadoop-service.hadoop.svc.cluster.local:9870', user='root')
     
     #client.makedirs('/home/stock_data')
     
@@ -40,7 +40,7 @@ def notify_kafka(ticker):
     
 for ticker in tickers:
     local_path = fetch_stock_data(ticker)
-    hdfs_path = f'/opt/airflow/stock_data/{ticker}.csv'
+    hdfs_path = f'/{ticker}.csv'
     upload_to_hadoop(local_path, hdfs_path)
     #notify_kafka(ticker)
 

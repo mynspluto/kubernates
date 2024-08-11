@@ -8,7 +8,7 @@ ENV HADOOP_HOME=/usr/local/hadoop
 
 # Install necessary packages
 RUN apt-get update && \
-    apt-get install -y wget openjdk-8-jdk ssh pdsh rsync sudo openssh-server && \
+    apt-get install -y vim wget openjdk-8-jdk ssh pdsh rsync sudo openssh-server net-tools curl && \
     apt-get clean
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64
@@ -38,6 +38,9 @@ RUN chmod +x ${HADOOP_HOME}/etc/hadoop/core-site.xml
 COPY config/core-site.xml ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
 RUN chmod +x ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
 
+# COPY config/hdfs-default.xml ${HADOOP_HOME}/etc/hadoop/hdfs-default.xml
+# RUN chmod +x ${HADOOP_HOME}/etc/hadoop/hdfs-default.xml
+
 RUN mkdir -p $HADOOP_HOME/data/dfs/namenode && \
     mkdir -p $HADOOP_HOME/data/dfs/datanode && \
     chmod -R 777 $HADOOP_HOME
@@ -58,10 +61,6 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
     chmod 0600 ~/.ssh/authorized_keys && \
     echo "Host *\n    StrictHostKeyChecking no\n" >> /etc/ssh/ssh_config
-
-# 6. 로케일 설정 (UTF-8, 필요에 따라)
-RUN apt-get install -y locales && \
-    locale-gen en_US.UTF-8
 
 # Expose necessary ports
 EXPOSE 22 9870 9864 8088 8042

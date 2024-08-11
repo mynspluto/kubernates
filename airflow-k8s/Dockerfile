@@ -3,7 +3,7 @@ FROM apache/airflow:2.9.2
 USER root
 
 RUN apt-get update && \
-    apt-get install -y python3-pip && \
+    apt-get install -y python3-pip net-tools curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

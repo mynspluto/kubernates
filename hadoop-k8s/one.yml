@@ -38,7 +38,11 @@ spec:
       imagePullPolicy: IfNotPresent
       ports:
         - containerPort: 9870
+        - containerPort: 8020
         - containerPort: 9000
+        - containerPort: 9864
+        - containerPort: 9867
+        - containerPort: 14000
       volumeMounts:
         - name: hadoop-data
           mountPath: /usr/local/hadoop/data

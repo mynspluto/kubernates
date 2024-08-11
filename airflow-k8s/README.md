@@ -1,11 +1,12 @@
+kubectl create namespace airflow
+kubectl config set-context --current --namespace=airflow
+helm uninstall airflow -n airflow
 minikube ssh
 docker rmi mynspluto-airflow
 
 docker build -t mynspluto-airflow:latest .
 
 minikube image load mynspluto-airflow:latest
-
-kubectl create namespace airflow
 
 helm install airflow apache-airflow/airflow -n airflow -f values.yml
 
@@ -15,8 +16,6 @@ kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow
 
 id: admin
 pw: admin
-
-helm uninstall airflow -n airflow
 
 kubectl exec -it airflow-webserver-948b685fd-5vhbd -- /bin/bash
 

@@ -10,8 +10,28 @@ spec:
       protocol: TCP
       port: 9870
       targetPort: 9870
+    - name: namenode-8020
+      protocol: TCP
+      port: 8020
+      targetPort: 8020
     - name: namenode-rpc
       protocol: TCP
       port: 9000
       targetPort: 9000
+    - name: datanode-http
+      protocol: TCP
+      port: 9864
+      targetPort: 9864
+    - name: datanode-ipc
+      protocol: TCP
+      port: 9867
+      targetPort: 9867
+    - name: web-hdfs
+      protocol: TCP
+      port: 14000
+      targetPort: 14000
+    - name: ssh
+      protocol: TCP
+      port: 22
+      targetPort: 22
   type: NodePort
