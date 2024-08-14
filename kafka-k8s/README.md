@@ -1,5 +1,5 @@
 minikube delete
-minikube start --memory 15976
+minikube start --memory 15976 --driver=docker
 
 helm repo add confluentinc https://packages.confluent.io/helm
 helm repo update

@@ -1,23 +1,39 @@
+# 네임스페이스 생성 및 변경
+
 kubectl create namespace airflow
 kubectl config set-context --current --namespace=airflow
+
+# 기존 요소 제거
+
 helm uninstall airflow -n airflow
+kubectl delete all --all -n airflow
 docker system prune -a
 minikube ssh
 docker rmi mynspluto-airflow
 
-docker build -t mynspluto-airflow:latest .
+# 이미지 생성, 이미지 로드
 
+minikube image ls --format table
+
+docker build -t mynspluto-airflow:latest .
 minikube image load mynspluto-airflow:latest
+k3d image import my-airflow-image:latest -c my-cluster
+
+# 요소 생성, 서비스 포워딩
 
 helm install airflow apache-airflow/airflow -n airflow -f values.yml
-
-helm upgrade airflow apache-airflow/airflow -n airflow -f values.yml
-
 kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow
 
 id: admin
 pw: admin
 
+# 요소 업데이트
+
+helm upgrade airflow apache-airflow/airflow -n airflow -f values.yml
+
+# 컨테이너 bash 접속
+
+kubectl get pod
 kubectl exec -it airflow-webserver-948b685fd-5vhbd -- /bin/bash
 
 dag 추가가 안되는 이슈

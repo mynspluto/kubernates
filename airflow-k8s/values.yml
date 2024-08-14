@@ -2,8 +2,8 @@ executor: CeleryExecutor
 
 images:
   airflow:
-    pullPolicy: Never
-    repository: mynspluto-airflow
+    #repository: mynspluto-airflow
+    repository: docker.io/library/mynspluto-airflow
     tag: latest
 
 web:
