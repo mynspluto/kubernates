@@ -5,7 +5,7 @@ kubectl config set-context --current --namespace=kafka
 
 # 기존 요소 제거
 
-kubectl delete -f platform.yml
+kubectl delete -f platform-kraft.yml
 kubectl delete all --all -n kafka (pv, pvc는 안지워짐)
 kubectl delete pvc --all -n kafka
 kubectl delete pv --all -n kafka
@@ -19,10 +19,14 @@ helm upgrade --install \
  confluent-operator confluentinc/confluent-for-kubernetes
 kubectl get pods
 
-kubectl apply -f platform.yml
+kubectl apply -f platform-kraft.yml
 
 kubectl port-forward controlcenter-0 9021:9021
 127.0.0.1:9021 접속(컨트롤센터 웹)
+
+kubectl port-forward svc/kafkarestproxy 8082:8082
+curl -X GET -H "Accept: application/vnd.kafka.v2+json" \
+ http://localhost:8082/topics
 
 image pull error 뜨는 경우
 docker pull confluentinc/cp-kafka-rest:7.6.1.arm64 이런식으로 수동으로 받은후
@@ -34,6 +38,8 @@ minikube start --memory 15976 (15976은 도커 데스크탑앱 설정에서 제�
 
 replica 1로 바꾸면 에러남
 metadata.namespace바꿔도 에러나는듯
+=> https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/quickstart-deploy/confluent-platform-singlenode.yaml
+싱글 모드 예제로 해결
 
 todo
 airflow로 하루에 한번 주가 데이터 수집
