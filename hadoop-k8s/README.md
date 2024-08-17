@@ -1,27 +1,43 @@
+# 네임스페이스 생성 및 변경
+
 kubectl create namespace hadoop
 kubectl config set-context --current --namespace=hadoop
-docker system prune -a
+
+# 기존 요소 제거
 
 kubectl delete all --all -n hadoop (pv, pvc는 안지워짐)
 kubectl delete pvc --all -n hadoop
 kubectl delete pv hadoop-pv
+docker system prune -a
 
 minikube ssh
 docker rmi hadoop
+
+# 이미지 생성, 이미지 로드
+
+minikube image ls --format table
 docker build -t hadoop:latest .
-minikube image load hadoop:latest
+
+# 요소 생성, 서비스 포워딩
 
 kubectl apply -f svc.yml --namespace=hadoop
 kubectl apply -f one.yml --namespace=hadoop
 
 kubectl get endpoints -n hadoop
-
 kubectl port-forward service/hadoop-service 9870(port: 1234면 1234, 9870이라 9870인거임)
 
 vim /usr/local/hadoop/etc/hadoop/core-site.xml
 $HADOOP_HOME/sbin/stop-all.sh
 $HADOOP_HOME/bin/hadoop namenode -format
 $HADOOP_HOME/sbin/start-all.sh
+
+# 리소스 사용량
+
+NAME CPU(cores) MEMORY(bytes)  
+hadoop-statefulset-0 17m 705Mi
+
+NAME CPU(cores) CPU% MEMORY(bytes) MEMORY%  
+minikube 221m 2% 1701Mi 7%
 
 TODO
 https://hadoop.apache.org/docs/r3.0.0/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml

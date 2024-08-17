@@ -14,10 +14,7 @@ docker rmi mynspluto-airflow
 # 이미지 생성, 이미지 로드
 
 minikube image ls --format table
-
 docker build -t mynspluto-airflow:latest .
-minikube image load mynspluto-airflow:latest
-k3d image import my-airflow-image:latest -c my-cluster
 
 # 요소 생성, 서비스 포워딩
 
@@ -52,3 +49,19 @@ pyspark등으로 하둡에저장, 저장후 카프카 메시지로 저장됐다�
 카프카 소비자에서 저장됐단 메시지를 받고 하둡에 접근하여 파일 읽어온후 스파크에 올림
 데이터 전처리
 학습
+
+# 리소스 사용량
+
+NAME CPU(cores) MEMORY(bytes)  
+airflow-postgresql-0 37m 83Mi  
+airflow-redis-0 2m 9Mi  
+airflow-scheduler-56f59c9dcd-4j6mv 825m 317Mi  
+airflow-statsd-b45f54fb4-jxk5b 3m 9Mi  
+airflow-triggerer-0 569m 481Mi  
+airflow-webserver-7fbbd9ff5d-qh278 769m 835Mi  
+airflow-worker-0 713m 1825Mi
+
+# 하둡 + 에어플로우 리소스 사용량
+
+NAME CPU(cores) CPU% MEMORY(bytes) MEMORY%  
+minikube 3113m 38% 4863Mi 20%

@@ -1,5 +1,17 @@
-minikube delete
-minikube start --memory 15976 --driver=docker
+# 네임스페이스 생성 및 변경
+
+kubectl create namespace kafka
+kubectl config set-context --current --namespace=kafka
+
+# 기존 요소 제거
+
+kubectl delete -f platform.yml
+kubectl delete all --all -n kafka (pv, pvc는 안지워짐)
+kubectl delete pvc --all -n kafka
+kubectl delete pv --all -n kafka
+docker system prune -a
+
+# 요소 생성, 서비스 포워딩
 
 helm repo add confluentinc https://packages.confluent.io/helm
 helm repo update
@@ -7,8 +19,7 @@ helm upgrade --install \
  confluent-operator confluentinc/confluent-for-kubernetes
 kubectl get pods
 
-kubectl apply -f 1.yml
-kubectl apply -f 2.yml
+kubectl apply -f platform.yml
 
 kubectl port-forward controlcenter-0 9021:9021
 127.0.0.1:9021 접속(컨트롤센터 웹)
@@ -33,3 +44,42 @@ airflow로 하루에 한번 주가 데이터 수집
 전처리를 하여 보조지표 등 필요한 데이터 파싱
 학습
 학습된 모델 하둡으로 저장
+
+카프카 정상적으로 생성
+elastic-0 생성 실패함
+=> namespace 1.yml, 2.yml 수정한거,
+하둡 에어플로우 때매 하드웨어 스펙 부족으로 실패 추측
+https://docs.confluent.io/operator/current/co-quickstart.html
+
+생성된 카프카 서비스 확인후
+kafka-rest로 producer, consumer test
+https://docs.confluent.io/platform/current/kafka-rest/index.html
+
+에어플로우와 연동하여
+consumer, producer test
+https://airflow.apache.org/docs/apache-airflow-providers-apache-kafka/stable/_modules/tests/system/providers/apache/kafka/example_dag_hello_kafka.html
+
+https://docs.confluent.io/kafka-clients/python/current/overview.html
+
+# 리소스 사용량
+
+NAME CPU(cores) MEMORY(bytes)  
+confluent-operator-6df55d9796-zjsnn 3m 50Mi  
+connect-0 18m 3296Mi  
+controlcenter-0 318m 475Mi  
+kafka-0 139m 1328Mi  
+kafka-1 142m 1381Mi  
+kafka-2 147m 1307Mi  
+kafkarestproxy-0 3m 351Mi  
+kraftcontroller-0 22m 613Mi  
+kraftcontroller-1 22m 547Mi  
+kraftcontroller-2 41m 623Mi  
+ksqldb-0 161m 464Mi  
+schemaregistry-0 37m 375Mi  
+schemaregistry-1 41m 413Mi  
+schemaregistry-2 38m 376Mi
+
+# 에어플로우 + 하둡 + 카프카 리소스 사용량
+
+NAME CPU(cores) CPU% MEMORY(bytes) MEMORY%
+minikube 1275m 15% 19422Mi 80%
