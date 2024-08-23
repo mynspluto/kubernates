@@ -89,3 +89,10 @@ schemaregistry-2 38m 376Mi
 
 NAME CPU(cores) CPU% MEMORY(bytes) MEMORY%
 minikube 1275m 15% 19422Mi 80%
+
+# 테스트
+
+kubectl port-forward svc/kafkarestproxy 8082:8082
+
+curl -X GET -H "Accept: application/vnd.kafka.v2+json" http://localhost:8082/topics
+=> bad hostname 나오면 줄바꿈 때문
