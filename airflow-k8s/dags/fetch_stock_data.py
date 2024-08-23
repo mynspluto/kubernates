@@ -28,9 +28,16 @@ def upload_to_hadoop(local_path, hdfs_path):
     
 def notify_kafka(ticker):
     kafka_conf = {
-        'bootstrap.servers': '<kafka-broker-host>:<port>',
+        #http://kafkarestproxy.kafka.svc.cluster.local:8082
+        'bootstrap.servers': '<kafka-broker-host>:<port>', 
         'client.id': 'stock-data-producer'
     }
+    
+    #https://airflow.apache.org/docs/apache-airflow-providers-apache-kafka/stable/_modules/tests/system/providers/apache/kafka/example_dag_hello_kafka.html
+    # 참고하여 fetch_stock_data => load_connection => produce => consumer 하면 될듯
+    # 9092가 기본포트
+    # https://developer.confluent.io/faq/apache-kafka/kafka-operations/
+    
     producer = Producer(kafka_conf)
     
     message = f'File for {ticker} has been uploaded to HDFS'
