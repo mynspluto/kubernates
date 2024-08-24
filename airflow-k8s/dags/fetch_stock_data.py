@@ -1,5 +1,4 @@
 import os
-
 import yfinance as yf
 import pandas as pd
 from confluent_kafka import Producer
@@ -7,12 +6,8 @@ import requests
 from datetime import datetime, timedelta
 
 from airflow import DAG
-
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
-from airflow.providers.apache.kafka.operators.consume import ConsumeFromTopicOperator
-from airflow.providers.apache.kafka.operators.produce import ProduceToTopicOperator
-from airflow.providers.apache.kafka.sensors.kafka import AwaitMessageSensor
 
 webhdfs_url = 'http://hadoop-service.hadoop.svc.cluster.local:9870/webhdfs/v1'
 
@@ -31,31 +26,22 @@ def fetch_stock_data(local_path, tickers):
         # 각 티커의 데이터를 별도의 파일로 저장
         df.to_csv(f"{local_path}/{ticker}.csv", index=False)
 
-def upload_to_hadoop(local_path, hdfs_path):
-    upload_url = f"{webhdfs_url}{hdfs_path}?op=CREATE&overwrite=true"
-    
-    with open(local_path, 'rb') as f:
-        response = requests.put(upload_url, data=f)
-    
-    print("response", response)
-    
-def notify_kafka(ticker):
-    kafka_conf = {
-        #http://kafkarestproxy.kafka.svc.cluster.local:8082
-        'bootstrap.servers': 'http://kafkarestproxy.kafka.svc.cluster.local:9092', 
-        'client.id': 'stock-data-producer'
-    }
-    
-    #https://airflow.apache.org/docs/apache-airflow-providers-apache-kafka/stable/_modules/tests/system/providers/apache/kafka/example_dag_hello_kafka.html
-    # 참고하여 fetch_stock_data => load_connection => produce => consumer 하면 될듯
-    # 9092가 기본포트
-    # https://developer.confluent.io/faq/apache-kafka/kafka-operations/
-    
-    producer = Producer(kafka_conf)
-    
-    message = f'File for {ticker} has been uploaded to HDFS'
-    producer.produce('stock-data-topic', message)
-    producer.flush()
+# HDFS에 파일 업로드 함수
+# kubectl exec -it hadoop-statefulset-0 -- /bin/bash
+# $HADOOP_HOME/bin/hdfs dfs -chmod -R 777 /
+def upload_to_hadoop(local_path):
+    for root, dirs, files in os.walk(local_path):
+        for file in files:
+            local_file_path = os.path.join(root, file)
+            # HDFS 경로 생성
+            relative_path = os.path.relpath(local_file_path, local_path)
+            hdfs_file_path = os.path.join(relative_path)
+            upload_url = f"{webhdfs_url}/{hdfs_file_path}?op=CREATE&overwrite=true"
+            
+            with open(local_file_path, 'rb') as f:
+                response = requests.put(upload_url, data=f)
+            
+            print(f"Uploaded {local_file_path} to {hdfs_file_path}, response: {response}")
 
 with DAG(
     "dag-test",
@@ -74,45 +60,15 @@ with DAG(
     tags=["example"],
 ) as dag:
     fetch_stock_task = PythonOperator(
-        task_id="fetch_stock_data",
+        task_id="fetch_stock_data_task",
         python_callable=fetch_stock_data,
         op_args=['/opt/airflow/stock_data', tickers],  # 로컬 경로와 티커 리스트를 인자로 전달
     )
-
     
-    fetch_stock_data
+    upload_to_hadoop_task = PythonOperator(
+        task_id="upload_to_hadoop_task",
+        python_callable=upload_to_hadoop,
+        op_args=['/opt/airflow/stock_data'],  # 로컬 경로와 티커 리스트를 인자로 전달
+    )
     
-# for ticker in tickers:
-#     local_path = f'/opt/airflow/stock_data/asd.csv'
-#     fetch_stock_data(local_path, ticker)
-#     upload_to_hadoop(local_path, f'/{ticker}.csv')
-    #notify_kafka(ticker)
-
-# # 각 종목의 데이터를 수집하고 HDFS에 업로드
-# for ticker in tickers:
-#     # 첫 번째 작업: 주가 데이터를 수집
-#     fetch_task = PythonOperator(
-#         task_id=f'fetch_{ticker}_data',
-#         python_callable=fetch_stock_data,
-#         op_args=[ticker],
-#         dag=dag,
-#     )
-
-#     # 두 번째 작업: HDFS에 업로드
-#     upload_task = PythonOperator(
-#         task_id=f'upload_{ticker}_data_to_hdfs',
-#         python_callable=upload_to_hadoop,
-#         op_args=[f'../stock_data/{ticker}.csv', f'/user/your_username/stock_data/{ticker}.csv'],
-#         dag=dag,
-#     )
-
-#     # 세 번째 작업: Kafka에 알림 전송
-#     notify_task = PythonOperator(
-#         task_id=f'notify_kafka_{ticker}',
-#         python_callable=notify_kafka,
-#         op_args=[ticker],
-#         dag=dag,
-#     )
-
-#     # 의존성 설정
-#     fetch_task >> upload_task >> notify_task
+    fetch_stock_task >> upload_to_hadoop_task

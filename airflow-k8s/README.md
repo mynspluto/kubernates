@@ -24,6 +24,11 @@ kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow
 id: admin
 pw: admin
 
+# dag 디버깅
+
+kubectl exec -it airflow-worker-0 -- /bin/bash
+cd logs
+
 # 요소 업데이트
 
 helm upgrade airflow apache-airflow/airflow -n airflow -f values.yml
