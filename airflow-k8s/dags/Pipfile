@@ -10,6 +10,7 @@ yfinance = "*"
 pandas = "*"
 confluent-kafka = "*"
 requests = "*"
+apache-airflow-providers-apache-kafka = "*"
 
 [dev-packages]
 

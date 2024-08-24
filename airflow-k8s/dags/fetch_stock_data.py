@@ -1,10 +1,18 @@
-from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
-from airflow.utils.dates import days_ago
+import os
+
 import yfinance as yf
 import pandas as pd
 from confluent_kafka import Producer
 import requests
+from datetime import datetime, timedelta
+
+from airflow import DAG
+
+from airflow.utils.dates import days_ago
+from airflow.operators.python import PythonOperator
+from airflow.providers.apache.kafka.operators.consume import ConsumeFromTopicOperator
+from airflow.providers.apache.kafka.operators.produce import ProduceToTopicOperator
+from airflow.providers.apache.kafka.sensors.kafka import AwaitMessageSensor
 
 webhdfs_url = 'http://hadoop-service.hadoop.svc.cluster.local:9870/webhdfs/v1'
 
@@ -12,11 +20,16 @@ webhdfs_url = 'http://hadoop-service.hadoop.svc.cluster.local:9870/webhdfs/v1'
 tickers = ['^IXIC']
 
 # 주가 데이터를 저장할 함수
-def fetch_stock_data(local_path, ticker):
-    stock = yf.Ticker(ticker)
-    df = stock.history(period='max')
-    df.reset_index(inplace=True)
-    df.to_csv(local_path, index=False)
+def fetch_stock_data(local_path, tickers):
+    if not os.path.exists(local_path):
+        os.makedirs(local_path)
+        
+    for ticker in tickers:
+        stock = yf.Ticker(ticker)
+        df = stock.history(period='max')
+        df.reset_index(inplace=True)
+        # 각 티커의 데이터를 별도의 파일로 저장
+        df.to_csv(f"{local_path}/{ticker}.csv", index=False)
 
 def upload_to_hadoop(local_path, hdfs_path):
     upload_url = f"{webhdfs_url}{hdfs_path}?op=CREATE&overwrite=true"
@@ -29,7 +42,7 @@ def upload_to_hadoop(local_path, hdfs_path):
 def notify_kafka(ticker):
     kafka_conf = {
         #http://kafkarestproxy.kafka.svc.cluster.local:8082
-        'bootstrap.servers': '<kafka-broker-host>:<port>', 
+        'bootstrap.servers': 'http://kafkarestproxy.kafka.svc.cluster.local:9092', 
         'client.id': 'stock-data-producer'
     }
     
@@ -43,11 +56,36 @@ def notify_kafka(ticker):
     message = f'File for {ticker} has been uploaded to HDFS'
     producer.produce('stock-data-topic', message)
     producer.flush()
+
+with DAG(
+    "dag-test",
+    default_args={
+        "owner": "airflow",
+        "depend_on_past": False,
+        "email_on_failure": False,
+        "email_on_retry": False,
+        "retries": 1,
+        "retry_delay": timedelta(minutes=5),
+    },
+    description="Examples of Kafka Operators",
+    schedule=timedelta(days=1),
+    start_date=datetime(2021, 1, 1),
+    catchup=False,
+    tags=["example"],
+) as dag:
+    fetch_stock_task = PythonOperator(
+        task_id="fetch_stock_data",
+        python_callable=fetch_stock_data,
+        op_args=['/opt/airflow/stock_data', tickers],  # 로컬 경로와 티커 리스트를 인자로 전달
+    )
+
     
-for ticker in tickers:
-    local_path = f'/opt/airflow/stock_data/asd.csv'
-    fetch_stock_data(local_path, ticker)
-    upload_to_hadoop(local_path, f'/{ticker}.csv')
+    fetch_stock_data
+    
+# for ticker in tickers:
+#     local_path = f'/opt/airflow/stock_data/asd.csv'
+#     fetch_stock_data(local_path, ticker)
+#     upload_to_hadoop(local_path, f'/{ticker}.csv')
     #notify_kafka(ticker)
 
 # # 각 종목의 데이터를 수집하고 HDFS에 업로드

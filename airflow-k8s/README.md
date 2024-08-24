@@ -13,10 +13,10 @@ docker rmi mynspluto-airflow
 
 # 이미지 생성, 이미지 로드
 
-minikube image ls --format table
+docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}"
 docker build -t mynspluto-airflow:latest .
 
-# 요소 생성, 서비스 포워딩
+# 실행, 테스트
 
 helm install airflow apache-airflow/airflow -n airflow -f values.yml
 kubectl port-forward svc/airflow-webserver 8080:8080 -n airflow
