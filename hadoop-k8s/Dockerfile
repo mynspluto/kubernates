@@ -18,11 +18,20 @@ ENV PATH=$PATH:$JAVA_HOME/bin
 RUN echo "JAVA_HOME is set to $JAVA_HOME" && \
     ls -la $JAVA_HOME
 
-# Download and extract Hadoop
-RUN wget https://downloads.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}-aarch64.tar.gz && \
-    tar -xzvf hadoop-${HADOOP_VERSION}-aarch64.tar.gz && \
+# 하둡 설치 - web에서 가져오기 or 로컬에서 가져오기 둘 중 하나 선택
+# hadoop 설치 방법 - web에서 가져오기
+# RUN wget https://downloads.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}-aarch64.tar.gz && \
+#     tar -xzvf hadoop-${HADOOP_VERSION}-aarch64.tar.gz && \
+#     mv hadoop-${HADOOP_VERSION} $HADOOP_HOME && \
+#     rm hadoop-${HADOOP_VERSION}-aarch64.tar.gz
+
+# 하둡 설치 - 로컬에 있는 hadoop tar.gz 파일을 컨테이너에 복사
+COPY hadoop-${HADOOP_VERSION}-aarch64.tar.gz /tmp/
+
+# 이후에 tar.gz 파일을 사용하여 Hadoop 설치
+RUN tar -xzvf /tmp/hadoop-${HADOOP_VERSION}-aarch64.tar.gz && \
     mv hadoop-${HADOOP_VERSION} $HADOOP_HOME && \
-    rm hadoop-${HADOOP_VERSION}-aarch64.tar.gz
+    rm /tmp/hadoop-${HADOOP_VERSION}-aarch64.tar.gz
 
 ENV PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 

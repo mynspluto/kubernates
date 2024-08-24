@@ -15,7 +15,7 @@ docker rmi hadoop
 
 # 이미지 생성, 이미지 로드
 
-minikube image ls --format table
+docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}"
 docker build -t hadoop:latest .
 
 # 요소 생성, 서비스 포워딩
@@ -25,6 +25,17 @@ kubectl apply -f one.yml --namespace=hadoop
 
 kubectl get endpoints -n hadoop
 kubectl port-forward service/hadoop-service 9870(port: 1234면 1234, 9870이라 9870인거임)
+
+# 테스트
+
+kubectl cp ./test_file.txt hadoop-statefulset-0:/tmp/test_file.txt -n hadoop
+
+kubectl exec -it hadoop-statefulset-0 -- hdfs dfs -mkdir -p /airflow/test_data
+kubectl exec -it hadoop-statefulset-0 -- hdfs dfs -put /tmp/test_file.txt /airflow/test_data/test_file.txt
+kubectl exec -it hadoop-statefulset-0 -- hdfs dfs -ls /airflow/test_data/
+kubectl exec -it hadoop-statefulset-0 -- hdfs dfs -cat /airflow/test_data/test_file.txt
+
+# 수동 하둡실행
 
 vim /usr/local/hadoop/etc/hadoop/core-site.xml
 $HADOOP_HOME/sbin/stop-all.sh
