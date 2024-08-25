@@ -2,12 +2,18 @@ import os
 import yfinance as yf
 import pandas as pd
 from confluent_kafka import Producer
+import json
 import requests
 from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
+
+from airflow.operators.python import PythonOperator
+from airflow.providers.apache.kafka.operators.consume import ConsumeFromTopicOperator
+from airflow.providers.apache.kafka.operators.produce import ProduceToTopicOperator
+from airflow.providers.apache.kafka.sensors.kafka import AwaitMessageSensor
 
 webhdfs_url = 'http://hadoop-service.hadoop.svc.cluster.local:9870/webhdfs/v1'
 
@@ -43,6 +49,47 @@ def upload_to_hadoop(local_path):
             
             print(f"Uploaded {local_file_path} to {hdfs_file_path}, response: {response}")
 
+def load_connections():
+    # Connections needed for this example dag to finish
+    from airflow.models import Connection
+    from airflow.utils import db
+
+    db.merge_conn(
+        Connection(
+            conn_id="t1",
+            conn_type="kafka",
+            extra=json.dumps({
+                "socket.timeout.ms": 10, 
+                "bootstrap.servers": "kafka.kafka.svc.cluster.local:9092"}),
+        )
+    )
+    
+    db.merge_conn(
+        Connection(
+            conn_id="t2",
+            conn_type="kafka",
+            extra=json.dumps(
+                {
+                    "bootstrap.servers": "kafka.kafka.svc.cluster.local:9092",
+                    "group.id": "t2",
+                    "enable.auto.commit": False,
+                    "auto.offset.reset": "beginning",
+                }
+            ),
+        )
+    )
+
+def producer_function():
+    for i in range(20):
+        yield (json.dumps(i), json.dumps(i + 1))
+        
+def consumer_function(message, prefix=None):
+    key = json.loads(message.key())
+    value = json.loads(message.value())
+    print("%s %s @ %s; %s : %s", prefix, message.topic(), message.offset(), key, value)
+    return
+
+    
 with DAG(
     "dag-test",
     default_args={
@@ -71,4 +118,25 @@ with DAG(
         op_args=['/opt/airflow/stock_data'],  # 로컬 경로와 티커 리스트를 인자로 전달
     )
     
-    fetch_stock_task >> upload_to_hadoop_task
+    t0 = PythonOperator(task_id="load_connections", python_callable=load_connections)
+    
+    t1 = ProduceToTopicOperator(
+        kafka_config_id="t1",
+        task_id="produce_to_topic",
+        topic="test_1",
+        producer_function="fetch_stock_data.producer_function",
+    )
+    
+    t2 = ConsumeFromTopicOperator(
+        kafka_config_id="t2",
+        task_id="consume_from_topic",
+        topics=["test_1"],
+        apply_function="fetch_stock_data.consumer_function",
+        apply_function_kwargs={"prefix": "consumed:::"},
+        commit_cadence="end_of_batch",
+        max_messages=10,
+        max_batch_size=2,
+    )
+    
+    
+    fetch_stock_task >> upload_to_hadoop_task >> t0 >> t1 >> t2

@@ -38,6 +38,14 @@ helm upgrade airflow apache-airflow/airflow -n airflow -f values.yml
 kubectl get pod
 kubectl exec -it airflow-webserver-948b685fd-5vhbd -- /bin/bash
 
+# 카프카 토픽 미생성시 에러
+
+- 클러스터 id 확인
+  curl -X GET "http://localhost:8082/v3/clusters"
+
+- test_1 topic 생성
+  curl -X GET "http://localhost:8082/v3/clusters/28e637f6-5449-4e11-a5w/topics/test_1/configs"
+
 dag 추가가 안되는 이슈
 kubectl exec -it airflow-scheduler-69c669d4f-tt4p5 -- /bin/bash
 ls /opt/airflow/dags/
