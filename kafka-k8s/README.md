@@ -67,6 +67,14 @@ https://airflow.apache.org/docs/apache-airflow-providers-apache-kafka/stable/_mo
 
 https://docs.confluent.io/kafka-clients/python/current/overview.html
 
+# 카프카 토픽 미생성시 에러
+
+- 클러스터 id 확인
+  curl -X GET "http://localhost:8082/v3/clusters"
+
+- test_1 topic 생성
+  curl -X GET "http://localhost:8082/v3/clusters/28e637f6-5449-4e11-a5w/topics/test_1/configs"
+
 # 리소스 사용량
 
 NAME CPU(cores) MEMORY(bytes)  
