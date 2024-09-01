@@ -18,14 +18,14 @@ ENV PATH=$PATH:$JAVA_HOME/bin
 RUN echo "JAVA_HOME is set to $JAVA_HOME" && \
     ls -la $JAVA_HOME
 
-# 하둡 설치 - web에서 가져오기 or 로컬에서 가져오기 둘 중 하나 선택
-# hadoop 설치 방법 - web에서 가져오기
+# 하둡 설치 - 1.web에서 가져오기 or 2.로컬에서 가져오기 둘 중 하나 선택
+# hadoop 설치 방법 - 1.web에서 가져오기
 # RUN wget https://downloads.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}-aarch64.tar.gz && \
 #     tar -xzvf hadoop-${HADOOP_VERSION}-aarch64.tar.gz && \
 #     mv hadoop-${HADOOP_VERSION} $HADOOP_HOME && \
 #     rm hadoop-${HADOOP_VERSION}-aarch64.tar.gz
 
-# 하둡 설치 - 로컬에 있는 hadoop tar.gz 파일을 컨테이너에 복사
+# 하둡 설치 - 2.로컬에 있는 hadoop tar.gz 파일을 컨테이너에 복사
 COPY hadoop-${HADOOP_VERSION}-aarch64.tar.gz /tmp/
 
 # 이후에 tar.gz 파일을 사용하여 Hadoop 설치
@@ -70,6 +70,19 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
     chmod 0600 ~/.ssh/authorized_keys && \
     echo "Host *\n    StrictHostKeyChecking no\n" >> /etc/ssh/ssh_config
+
+# Hadoop 사용자 및 그룹 생성
+RUN groupadd hadoop && \
+    useradd -m -g hadoop hadoop
+
+# 사용자 생성 및 비밀번호 설정
+RUN useradd -m mynspluto && \
+    echo 'mynspluto:mynsplutopassword' | chpasswd && \
+    usermod -aG hadoop mynspluto
+
+# 권한 부여
+RUN chown -R hadoop:hadoop $HADOOP_HOME && \
+    chmod -R 755 $HADOOP_HOME
 
 # Expose necessary ports
 EXPOSE 22 9870 9864 8088 8042

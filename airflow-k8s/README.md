@@ -78,3 +78,39 @@ airflow-worker-0 713m 1825Mi
 
 NAME CPU(cores) CPU% MEMORY(bytes) MEMORY%  
 minikube 3113m 38% 4863Mi 20%
+
+# 하둡 kerberos auth
+
+kerberos 사용시
+kerberos 서버를 띄워야 함
+kerberos 서버에서 kadmin ~~ 로 사용자 생성하면 키탭 파일이 생성됨
+이 파일을 하둡서버와 하둡클라이언트(airflow 측) 으로 가져오고
+하둡서버에서 키탭파일 경로를 지정(core-site ? hdfs-site)
+하둡클라이언트에서 kinit -kt /path/to/client.keytab user@EXAMPLE.COM 키탭파일 지정하여 티켓 발급
+
+krb5.conf
+[domain_realm]
+.example.com = hadoop-server.example.com
+example.com = hadoop-server.example.com
+
+webhdfs로 hadoop-server.example.com에 요청시 header authrization에 티켓포함
+
+# 하둡 kerberos auth 생략
+
+하둡 접속(kubectl exec -it hadoop~~ -- /bin/bash)
+호스트에서 hadoop 그룹 생성
+groupadd hadoop && \
+ useradd -m -g hadoop hadoop
+
+호스트에서 mynspluto 계정 생성
+useradd -m mynspluto && \
+ echo 'mynspluto:mynsplutopassword' | chpasswd && \
+ usermod -aG hadoop mynspluto
+
+cd ~~/bin
+호스트에서 생성된 hadoop 그룹, mynspluto 계정 이미 하둡에도 생성되었음
+소유자: mynspluto, 그룹: hadoop
+hdfs dfs -chown -R mynspluto:hadoop /
+
+소유자가 7 그룹이 5 일반사용자가 5 권한을 가짐
+hdfs dfs -chmod -R 755 /
