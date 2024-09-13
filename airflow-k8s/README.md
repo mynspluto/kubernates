@@ -95,6 +95,28 @@ example.com = hadoop-server.example.com
 
 webhdfs로 hadoop-server.example.com에 요청시 header authrization에 티켓포함
 
+# kerberos 인증 로직
+
+커버로스 서버, 하둡 서버, 클라이언트(에어플로우)가 있다고 가정
+커버로스 서버에서 하둡을 위한 user를 생성하고 이 user에 대한 키탭파일을 생성
+이 키탭 파일을 하둡 서버와 클라이언트에 저장
+클라이언트에서 하둡에 뭔가 요청을 할 때
+클라이언트는 키탭파일을 커버로스 서버에 전송하여 티켓(tgt Ticket-Granting Ticket)을 발급 받음
+이 티켓(tgt)을 하둡 서버에 전송하여 하둡 서비스티켓을 발급 받음
+하둡 서버에서는 본인이 저장했던 키탭파일을 기반으로 tgt티켓이 정상인지 판단함
+
+Keytab 파일 생성 및 배포:
+Kerberos 서버에서 각 principal에 대한 keytab 파일을 생성합니다.
+이 keytab 파일은 하둡 서버와 클라이언트에 각각 배포하여 인증 과정에서 사용됩니다.
+
+티켓 발급:
+클라이언트는 자신의 keytab 파일을 사용하여 Kerberos KDC에서 TGT를 발급받습니다.
+클라이언트는 TGT를 사용하여 하둡 서버에 대한 서비스 티켓을 요청합니다.
+
+서비스 티켓 검증:
+하둡 서버는 클라이언트가 보낸 서비스 티켓을 자신의 keytab 파일을 사용하여 검증합니다.
+검증된 티켓을 기반으로 클라이언트와의 안전한 통신을 설정합니다.
+
 # 하둡 kerberos auth 생략
 
 하둡 접속(kubectl exec -it hadoop~~ -- /bin/bash)
