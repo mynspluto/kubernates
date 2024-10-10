@@ -1,11 +1,3 @@
-minikube start --cpus 6 --memory 24000 --driver=docker
-minikube addons enable metrics-server
-minikube docker-env
-eval $(minikube -p minikube docker-env)
-
-#helm uninstall airflow -n airflow
-#kubectl delete all --all -n airflow
-
 kubectl create namespace airflow
 kubectl config set-context --current --namespace=airflow
 
@@ -24,4 +16,4 @@ if [ -n "$PID" ]; then
     kill $PID
     sleep 2  # Wait for the process to terminate
 fi
-kubectl port-forward svc/airflow-webserver $PORT:$PORT -n airflow
+nohup kubectl port-forward svc/airflow-webserver $PORT:$PORT -n airflow > port-forward.log 2>&1 &
