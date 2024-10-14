@@ -2,6 +2,9 @@ kubectl create namespace airflow
 kubectl config set-context --current --namespace=airflow
 
 docker build -t mynspluto-airflow:latest -f ./airflow/Dockerfile ./airflow
+helm repo add airflow-stable https://airflow-helm.github.io/charts
+helm repo add apache-airflow https://airflow.apache.org
+helm repo update
 helm install airflow apache-airflow/airflow -n airflow -f ./airflow/values.yml
 
 # Port to forward

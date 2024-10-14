@@ -2,8 +2,11 @@ executor: CeleryExecutor
 
 images:
   airflow:
-    #repository: mynspluto-airflow
-    repository: docker.io/library/mynspluto-airflow
+    #linux
+    repository: mynspluto-airflow
+
+    #mac
+    #repository: docker.io/library/mynspluto-airflow
     tag: latest
 
 web:
