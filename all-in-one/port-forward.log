@@ -1,2 +1,2 @@
 nohup: 입력 무시
-Error from server (NotFound): services "kafkarestproxy" not found
+Error from server (NotFound): services "hadoop-service" not found

@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hadoop-pv
+spec:
+  storageClassName: hadoop-storage
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hadoop-pvc
+spec:
+  storageClassName: hadoop-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hadoop-statefulset
+  namespace: hadoop
+spec:
+  serviceName: "hadoop-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      run: hadoop
+  template:
+    metadata:
+      labels:
+        run: hadoop
+    spec:
+      containers:
+        - name: hadoop-container
+          image: docker.io/library/hadoop:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9870
+            - containerPort: 8020
+            - containerPort: 9000
+            - containerPort: 9864
+            - containerPort: 9867
+            - containerPort: 14000
+          volumeMounts:
+            - name: hadoop-data
+              mountPath: /usr/local/hadoop/data
+          resources:
+            requests:
+              memory: "8000Mi"
+              cpu: "300m"
+            limits:
+              memory: "12000Mi"
+              cpu: "600m"
+      volumes:
+        - name: hadoop-data
+          persistentVolumeClaim:
+            claimName: hadoop-pvc
