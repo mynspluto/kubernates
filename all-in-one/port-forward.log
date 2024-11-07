@@ -1,2 +1,2 @@
-nohup: 입력 무시
-Error from server (NotFound): services "hadoop-service" not found
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080

@@ -8,10 +8,14 @@ ENV HADOOP_HOME=/usr/local/hadoop
 
 # Install necessary packages
 RUN apt-get update && \
-    apt-get install -y vim wget openjdk-8-jdk ssh pdsh rsync sudo openssh-server net-tools curl && \
+    apt-get install -y vim wget openjdk-11-jdk ssh pdsh rsync sudo openssh-server net-tools curl && \
     apt-get clean
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64
+ENV JAVA_HOME=/usr/lib/jvm/java-1.11.0-openjdk-amd64
+
+# Set JAVA_HOME and format Hadoop namenode
+#RUN export JAVA_HOME=/usr/lib/jvm/openjdk-11
+
 ENV PATH=$PATH:$JAVA_HOME/bin
 
 # Verify Java installation
@@ -20,18 +24,18 @@ RUN echo "JAVA_HOME is set to $JAVA_HOME" && \
 
 # 하둡 설치 - 1.web에서 가져오기 or 2.로컬에서 가져오기 둘 중 하나 선택
 # hadoop 설치 방법 - 1.web에서 가져오기
-RUN wget https://downloads.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz && \
-    tar -xzvf hadoop-${HADOOP_VERSION}.tar.gz && \
-    mv hadoop-${HADOOP_VERSION} $HADOOP_HOME && \
-    rm hadoop-${HADOOP_VERSION}.tar.gz
+# RUN wget https://downloads.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz && \
+#     tar -xzvf hadoop-${HADOOP_VERSION}.tar.gz && \
+#     mv hadoop-${HADOOP_VERSION} $HADOOP_HOME && \
+#     rm hadoop-${HADOOP_VERSION}.tar.gz
 
 # 하둡 설치 - 2.로컬에 있는 hadoop tar.gz 파일을 컨테이너에 복사
-# COPY hadoop-${HADOOP_VERSION}.tar.gz /tmp/
+COPY ./hadoop-${HADOOP_VERSION}.tar.gz /tmp/
 
 # 이후에 tar.gz 파일을 사용하여 Hadoop 설치
-RUN tar -xzvf /tmp/hadoop-${HADOOP_VERSION}.gz && \
+RUN tar -xzvf /tmp/hadoop-${HADOOP_VERSION}.tar.gz && \
     mv hadoop-${HADOOP_VERSION} $HADOOP_HOME && \
-    rm /tmp/hadoop-${HADOOP_VERSION}.gz
+    rm /tmp/hadoop-${HADOOP_VERSION}.tar.gz
 
 ENV PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 
@@ -89,11 +93,6 @@ EXPOSE 22 9870 9864 8088 8042
 
 # Start SSH service and Hadoop
 # 9. SSH 및 Hadoop DFS 시작
-# mac
-# CMD sh -c "/usr/sbin/sshd && export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64 && $HADOOP_HOME/sbin/start-dfs.sh && tail -f /dev/null"
+CMD sh -c "/usr/sbin/sshd && export JAVA_HOME=/usr/lib/jvm/java-1.11.0-openjdk-amd64 && $HADOOP_HOME/sbin/start-dfs.sh && tail -f /dev/null"
 
-# ubuntu
-# sudo apt-get install openjdk-8-jdk && sudo apt install openssh-server
-# sudo  systemctl enable sshd
-# sudo  systemctl restart sshd
-CMD sh -c "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 && $HADOOP_HOME/sbin/start-dfs.sh && tail -f /dev/null"
+#CMD sh -c "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64 && $HADOOP_HOME/sbin/start-dfs.sh && tail -f /dev/null"
