@@ -130,7 +130,9 @@ useradd -m mynspluto && \
  usermod -aG hadoop mynspluto
 
 [403 에러]
-cd ~~/bin
+cd /usr/local/hadoop/bin
+hdfs dfs -chmod -R 777 /
+
 호스트에서 생성된 hadoop 그룹, mynspluto 계정 이미 하둡에도 생성되었음
 소유자: mynspluto, 그룹: hadoop
 hdfs dfs -chown -R mynspluto:hadoop /

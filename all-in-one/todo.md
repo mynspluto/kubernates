@@ -14,3 +14,7 @@
    t1 => t2 데이터 전처리하여 하둡에 업로드 => t3 하둡에서 전처리된 데이터 다운 후 머신러닝
 
 hadoop dockerfile amd64 arm64 분기처리
+
+[hadoop 파일 업로드 403 에러]
+cd /usr/local/hadoop/bin
+hdfs dfs -chmod -R 777 /
