@@ -8,14 +8,6 @@ helm upgrade --install \
 kubectl get pods
 kubectl apply -f ./kafka/platform-kraft.yml
 
-kubectl wait --for=condition=Ready --timeout=300s pod/kraftcontroller-0
-kubectl wait --for=condition=Ready --timeout=300s pod/connect-0
-kubectl wait --for=condition=Ready --timeout=300s pod/controlcenter-0
-kubectl wait --for=condition=Ready --timeout=300s pod/kafka-0
-kubectl wait --for=condition=Ready --timeout=300s pod/kafkarestproxy-0
-kubectl wait --for=condition=Ready --timeout=300s pod/ksqldb-0
-kubectl wait --for=condition=Ready --timeout=300s pod/schemaregistry-0
-
 nohup kubectl port-forward controlcenter-0 9021:9021 -n kafka > port-forward.log 2>&1
 nohup kubectl port-forward svc/kafkarestproxy 8082:8082 -n kafka > port-forward.log 2>&1
 

@@ -129,6 +129,7 @@ useradd -m mynspluto && \
  echo 'mynspluto:mynsplutopassword' | chpasswd && \
  usermod -aG hadoop mynspluto
 
+[403 에러]
 cd ~~/bin
 호스트에서 생성된 hadoop 그룹, mynspluto 계정 이미 하둡에도 생성되었음
 소유자: mynspluto, 그룹: hadoop
