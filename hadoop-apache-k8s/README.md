@@ -33,3 +33,96 @@ at org.apache.hadoop.hdfs.server.namenode.NameNode.<init>(NameNode.java:1008)
 at org.apache.hadoop.hdfs.server.namenode.NameNode.createNameNode(NameNode.java:1782)
 at org.apache.hadoop.hdfs.server.namenode.NameNode.main(NameNode.java:1847)
 => hadoop-'hadoop'은 사용한 이미지에서 USER HADOOP 명령어로 user.name을 HADOOP으로 바꿨기 때문에 저 경로에서 찾는것으로 예상
+kubernates/hadoop-apache에서 도커 컴포즈로 docker exec ~~ /bin/bash로 확인해본 결과
+hadoop-hadoop폴더 존재하는 거 확인
+pv, pvc따로 만들어서 마운트하는것으로 해결
+
+리소스매니저 실패
+2024-11-16 08:54:40,807 INFO [main] http.HttpServer2 (HttpServer2.java:start(1308)) - HttpServer.start() threw a non Bind IOException
+java.net.BindException: Port in use: resourcemanager:8088
+at org.apache.hadoop.http.HttpServer2.constructBindException(HttpServer2.java:1369)
+at org.apache.hadoop.http.HttpServer2.bindForSinglePort(HttpServer2.java:1391)
+at org.apache.hadoop.http.HttpServer2.openListeners(HttpServer2.java:1454)
+at org.apache.hadoop.http.HttpServer2.start(HttpServer2.java:1300)
+at org.apache.hadoop.yarn.webapp.WebApps$Builder.start(WebApps.java:472)
+        at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.startWepApp(ResourceManager.java:1389)
+        at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.serviceStart(ResourceManager.java:1498)
+        at org.apache.hadoop.service.AbstractService.start(AbstractService.java:194)
+        at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.main(ResourceManager.java:1700)
+Caused by: java.io.IOException: Failed to bind to resourcemanager/10.110.36.41:8088
+        at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:349)
+        at org.eclipse.jetty.server.ServerConnector.open(ServerConnector.java:310)
+        at org.apache.hadoop.http.HttpServer2.bindListener(HttpServer2.java:1356)
+        at org.apache.hadoop.http.HttpServer2.bindForSinglePort(HttpServer2.java:1387)
+        ... 7 more
+Caused by: java.net.BindException: Cannot assign requested address
+        at sun.nio.ch.Net.bind0(Native Method)
+        at sun.nio.ch.Net.bind(Net.java:433)
+        at sun.nio.ch.Net.bind(Net.java:425)
+        at sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:223)
+        at sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:74)
+        at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:344)
+        ... 10 more
+2024-11-16 08:54:40,808 INFO  [main] service.AbstractService (AbstractService.java:noteFailure(267)) - Service ResourceManager failed in state STARTED
+org.apache.hadoop.yarn.webapp.WebAppException: Error starting http server
+        at org.apache.hadoop.yarn.webapp.WebApps$Builder.start(WebApps.java:476)
+at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.startWepApp(ResourceManager.java:1389)
+at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.serviceStart(ResourceManager.java:1498)
+at org.apache.hadoop.service.AbstractService.start(AbstractService.java:194)
+at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.main(ResourceManager.java:1700)
+Caused by: java.net.BindException: Port in use: resourcemanager:8088
+at org.apache.hadoop.http.HttpServer2.constructBindException(HttpServer2.java:1369)
+at org.apache.hadoop.http.HttpServer2.bindForSinglePort(HttpServer2.java:1391)
+at org.apache.hadoop.http.HttpServer2.openListeners(HttpServer2.java:1454)
+at org.apache.hadoop.http.HttpServer2.start(HttpServer2.java:1300)
+at org.apache.hadoop.yarn.webapp.WebApps$Builder.start(WebApps.java:472)
+        ... 4 more
+Caused by: java.io.IOException: Failed to bind to resourcemanager/10.110.36.41:8088
+        at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:349)
+        at org.eclipse.jetty.server.ServerConnector.open(ServerConnector.java:310)
+        at org.apache.hadoop.http.HttpServer2.bindListener(HttpServer2.java:1356)
+        at org.apache.hadoop.http.HttpServer2.bindForSinglePort(HttpServer2.java:1387)
+        ... 7 more
+Caused by: java.net.BindException: Cannot assign requested address
+        at sun.nio.ch.Net.bind0(Native Method)
+        at sun.nio.ch.Net.bind(Net.java:433)
+        at sun.nio.ch.Net.bind(Net.java:425)
+        at sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:223)
+        at sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:74)
+        at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:344)
+        ... 10 more
+2024-11-16 08:54:40,809 INFO  [main] resourcemanager.ResourceManager (ResourceManager.java:transitionToStandby(1482)) - Transitioning to standby state
+2024-11-16 08:54:40,809 INFO  [main] resourcemanager.ResourceManager (ResourceManager.java:transitionToStandby(1489)) - Transitioned to standby state
+2024-11-16 08:54:40,809 ERROR [main] resourcemanager.ResourceManager (MarkerIgnoringBase.java:error(159)) - Error starting ResourceManager
+org.apache.hadoop.yarn.webapp.WebAppException: Error starting http server
+        at org.apache.hadoop.yarn.webapp.WebApps$Builder.start(WebApps.java:476)
+at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.startWepApp(ResourceManager.java:1389)
+at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.serviceStart(ResourceManager.java:1498)
+at org.apache.hadoop.service.AbstractService.start(AbstractService.java:194)
+at org.apache.hadoop.yarn.server.resourcemanager.ResourceManager.main(ResourceManager.java:1700)
+Caused by: java.net.BindException: Port in use: resourcemanager:8088
+at org.apache.hadoop.http.HttpServer2.constructBindException(HttpServer2.java:1369)
+at org.apache.hadoop.http.HttpServer2.bindForSinglePort(HttpServer2.java:1391)
+at org.apache.hadoop.http.HttpServer2.openListeners(HttpServer2.java:1454)
+at org.apache.hadoop.http.HttpServer2.start(HttpServer2.java:1300)
+at org.apache.hadoop.yarn.webapp.WebApps$Builder.start(WebApps.java:472)
+... 4 more
+Caused by: java.io.IOException: Failed to bind to resourcemanager/10.110.36.41:8088
+at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:349)
+at org.eclipse.jetty.server.ServerConnector.open(ServerConnector.java:310)
+at org.apache.hadoop.http.HttpServer2.bindListener(HttpServer2.java:1356)
+at org.apache.hadoop.http.HttpServer2.bindForSinglePort(HttpServer2.java:1387)
+... 7 more
+Caused by: java.net.BindException: Cannot assign requested address
+at sun.nio.ch.Net.bind0(Native Method)
+at sun.nio.ch.Net.bind(Net.java:433)
+at sun.nio.ch.Net.bind(Net.java:425)
+at sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:223)
+at sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:74)
+at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:344)
+... 10 more
+2024-11-16 08:54:40,810 INFO [shutdown-hook-0] resourcemanager.ResourceManager (LogAdapter.java:info(51)) - SHUTDOWN_MSG:
+/************\*\*\*\*************\*\*\*\*************\*\*\*\*************
+SHUTDOWN_MSG: Shutting down ResourceManager at resourcemanager-6b6fb57bd8-dpkp9/10.244.2.2
+************\*\*\*\*************\*\*\*\*************\*\*\*\*************/
+=> 카프카 ksqldb가 8088를 쓰고 있기 때문으로 추정

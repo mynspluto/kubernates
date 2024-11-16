@@ -38,3 +38,10 @@ cimpl.KafkaException: KafkaError{code=\_UNKNOWN_TOPIC,val=-188,str="Unable to pr
 [2024-11-10T05:35:21.956+0000] {taskinstance.py:1206} INFO - Marking task as FAILED. dag_id=dag-test, task_id=produce_to_topic, run_id=scheduled**2024-11-09T00:00:00+00:00, execution_date=20241109T000000, start_date=20241110T053451, end_date=20241110T053521
 [2024-11-10T05:35:21.963+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 34 for task produce_to_topic (KafkaError{code=\_UNKNOWN_TOPIC,val=-188,str="Unable to produce message: Local: Unknown topic"}; 121)
 [2024-11-10T05:35:21.994+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+
+hadoop => hadoop-apache-k8s
+kafka => kafka-native-k8s
+교체
+
+hadoop, kafka는 k8s로 켜 놓은 상태에서
+airflow만 로컬 실행, dag git으로 동기화 하여 dag적용 간소화
