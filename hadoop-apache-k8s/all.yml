@@ -1,3 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: namenode-pv
+spec:
+  storageClassName: namenode-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: namenode-pvc
+spec:
+  storageClassName: namenode-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 # Hadoop Network (default in Kubernetes)
 apiVersion: v1
@@ -26,14 +51,13 @@ spec:
       containers:
         - name: namenode
           image: apache/hadoop:3
-          command: ["hdfs", "namenode"]
-          env:
-            - name: ENSURE_NAMENODE_DIR
-              value: "/tmp/hadoop-root/dfs/name"
+          command: ["hdfs", "namenode", "-format"]
           ports:
             - containerPort: 9870
             - containerPort: 8020
           volumeMounts:
+            - name: namenode-storage
+              mountPath: /tmp/hadoop-hadoop/dfs/name
             - name: hadoop-config-volume
               mountPath:
                 /opt/hadoop/etc/hadoop
@@ -41,6 +65,9 @@ spec:
                 # https://hub.docker.com/layers/apache/hadoop/3.4.1/images/sha256-69ffa97339aff768c4e6120c3fb27aa04c121402b1c8158408a5fb5be586a30e?context=explore
                 # WORKDIR /opt/hadoop
       volumes:
+        - name: namenode-storage
+          persistentVolumeClaim:
+            claimName: namenode-pvc
         - name: hadoop-config-volume
           configMap:
             name: hadoop-config # ConfigMap 이름
