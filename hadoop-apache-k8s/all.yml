@@ -1,147 +1,9 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: hadoop
-
----
-# Hadoop Config as ConfigMap
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hadoop-config
-  namespace: hadoop
-data:
-  core-site.xml: |
-    <configuration>
-      <property>
-        <name>fs.default.name</name>
-        <value>hdfs://namenode</value>
-      </property>
-      <property>
-        <name>fs.defaultFS</name>
-        <value>hdfs://namenode</value>
-      </property>
-    </configuration>
-  hdfs-site.xml: |
-    <configuration>
-      <property>
-        <name>dfs.namenode.rpc-address</name>
-        <value>namenode:8020</value>
-      </property>
-      <property>
-        <name>dfs.replication</name>
-        <value>3</value>
-      </property>
-      <property>
-        <name>dfs.permissions.enabled</name>
-        <value>false</value>
-      </property>
-    </configuration>
-  mapred-site.xml: |
-    <configuration>
-      <property>
-        <name>mapreduce.framework.name</name>
-        <value>yarn</value>
-      </property>
-      <property>
-        <name>yarn.app.mapreduce.am.env</name>
-        <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
-      </property>
-      <property>
-        <name>mapreduce.map.env</name>
-        <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
-      </property>
-      <property>
-        <name>mapreduce.reduce.env</name>
-        <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
-      </property>
-    </configuration>
-  yarn-site.xml: |
-    <configuration>
-      <property>
-        <name>yarn.resourcemanager.hostname</name>
-        <value>resourcemanager</value>
-      </property>
-      <property>
-        <name>yarn.nodemanager.pmem-check-enabled</name>
-        <value>false</value>
-      </property>
-      <property>
-        <name>yarn.nodemanager.delete.debug-delay-sec</name>
-        <value>600</value>
-      </property>
-      <property>
-        <name>yarn.nodemanager.vmem-check-enabled</name>
-        <value>false</value>
-      </property>
-      <property>
-        <name>yarn.nodemanager.aux-services</name>
-        <value>mapreduce_shuffle</value>
-      </property>
-    </configuration>
-  capacity-scheduler.xml: |
-    <configuration>
-      <property>
-        <name>yarn.scheduler.capacity.maximum-applications</name>
-        <value>10000</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.maximum-am-resource-percent</name>
-        <value>0.1</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.resource-calculator</name>
-        <value>org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.root.queues</name>
-        <value>default</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.root.default.capacity</name>
-        <value>100</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.root.default.user-limit-factor</name>
-        <value>1</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.root.default.maximum-capacity</name>
-        <value>100</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.root.default.state</name>
-        <value>RUNNING</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.root.default.acl_submit_applications</name>
-        <value>*</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.root.default.acl_administer_queue</name>
-        <value>*</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.node-locality-delay</name>
-        <value>40</value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.queue-mappings</name>
-        <value></value>
-      </property>
-      <property>
-        <name>yarn.scheduler.capacity.queue-mappings-override.enable</name>
-        <value>false</value>
-      </property>
-    </configuration>
-
 ---
 # Hadoop Network (default in Kubernetes)
 apiVersion: v1
 kind: Service
 metadata:
   name: hadoop-network
-  namespace: hadoop
 spec:
   clusterIP: None
 
@@ -151,7 +13,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: namenode
-  namespace: hadoop
 spec:
   replicas: 1
   selector:
@@ -166,18 +27,28 @@ spec:
         - name: namenode
           image: apache/hadoop:3
           command: ["hdfs", "namenode"]
-          envFrom:
-            - configMapRef:
-                name: hadoop-config
+          env:
+            - name: ENSURE_NAMENODE_DIR
+              value: "/tmp/hadoop-root/dfs/name"
           ports:
             - containerPort: 9870
             - containerPort: 8020
+          volumeMounts:
+            - name: hadoop-config-volume
+              mountPath:
+                /opt/hadoop/etc/hadoop
+                # 원래 /etc/hadoop일텐데 하둡 공식 이미지가 /opt/hadoop에 다운로드를 받아서 이 경로인듯 함
+                # https://hub.docker.com/layers/apache/hadoop/3.4.1/images/sha256-69ffa97339aff768c4e6120c3fb27aa04c121402b1c8158408a5fb5be586a30e?context=explore
+                # WORKDIR /opt/hadoop
+      volumes:
+        - name: hadoop-config-volume
+          configMap:
+            name: hadoop-config # ConfigMap 이름
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: namenode
-  namespace: hadoop
 spec:
   selector:
     app: namenode
@@ -195,7 +66,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: datanodes
-  namespace: hadoop
 spec:
   replicas: 3
   selector:
@@ -210,9 +80,13 @@ spec:
         - name: datanode
           image: apache/hadoop:3
           command: ["hdfs", "datanode"]
-          envFrom:
-            - configMapRef:
-                name: hadoop-config
+          volumeMounts:
+            - name: hadoop-config-volume
+              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
+      volumes:
+        - name: hadoop-config-volume
+          configMap:
+            name: hadoop-config # ConfigMap 이름
 
 ---
 # Resourcemanager Deployment and Service
@@ -220,7 +94,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: resourcemanager
-  namespace: hadoop
 spec:
   replicas: 1
   selector:
@@ -241,18 +114,17 @@ spec:
           ports:
             - containerPort: 8088
           volumeMounts:
-            - name: script-volume
-              mountPath: /opt
+            - name: hadoop-config-volume
+              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
       volumes:
-        - name: script-volume
-          hostPath:
-            path: ./test.sh
+        - name: hadoop-config-volume
+          configMap:
+            name: hadoop-config # ConfigMap 이름
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: resourcemanager
-  namespace: hadoop
 spec:
   selector:
     app: resourcemanager
@@ -267,7 +139,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nodemanager
-  namespace: hadoop
 spec:
   replicas: 1
   selector:
@@ -282,6 +153,10 @@ spec:
         - name: nodemanager
           image: apache/hadoop:3
           command: ["yarn", "nodemanager"]
-          envFrom:
-            - configMapRef:
-                name: hadoop-config
+          volumeMounts:
+            - name: hadoop-config-volume
+              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
+      volumes:
+        - name: hadoop-config-volume
+          configMap:
+            name: hadoop-config # ConfigMap 이름

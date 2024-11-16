@@ -10,3 +10,13 @@ at org.apache.hadoop.hdfs.server.datanode.DataNode.instantiateDataNode(DataNode.
 at org.apache.hadoop.hdfs.server.datanode.DataNode.createDataNode(DataNode.java:3098)
 at org.apache.hadoop.hdfs.server.datanode.DataNode.secureMain(DataNode.java:3242)
 at org.apache.hadoop.hdfs.server.datanode.DataNode.main(DataNode.java:3266)
+
+=> volumeMounts: - name: hadoop-config-volume
+mountPath: /opt/hadoop/etc/hadoop
+volumes: - name: hadoop-config-volume
+configMap:
+name: hadoop-config
+으로 해결
+도커 공식 이미지 레이어를 보니
+https://hub.docker.com/layers/apache/hadoop/3.4.1/images/sha256-69ffa97339aff768c4e6120c3fb27aa04c121402b1c8158408a5fb5be586a30e?context=explore
+하둡 다운 경로가 /opt/hadoop 이라 /opt/hadoop/etc/hadoop의 컨피그 파일을 교체하면 되었음
