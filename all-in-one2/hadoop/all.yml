@@ -1,0 +1,184 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: namenode-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /var/lib/hadoop-hdfs/cache/hdfs/dfs/name
+---
+# pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: namenode-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+# Namenode Deployment and Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: namenode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: namenode
+  template:
+    metadata:
+      labels:
+        app: namenode
+    spec:
+      containers:
+        - name: namenode
+          image: apache/hadoop:3
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              if [ ! -d "/var/lib/hadoop-hdfs/cache/hdfs/dfs/name/current" ]; then
+                echo "Y" | hdfs namenode -format
+              fi
+              hdfs namenode
+          ports:
+            - containerPort: 9870
+            - containerPort: 8020
+          volumeMounts:
+            - name: hdfs-name-volume
+              mountPath: /var/lib/hadoop-hdfs/cache/hdfs/dfs/name
+            - name: hadoop-config-volume
+              mountPath:
+                /opt/hadoop/etc/hadoop
+                # 원래 /etc/hadoop일텐데 하둡 공식 이미지가 /opt/hadoop에 다운로드를 받아서 이 경로인듯 함
+                # https://hub.docker.com/layers/apache/hadoop/3.4.1/images/sha256-69ffa97339aff768c4e6120c3fb27aa04c121402b1c8158408a5fb5be586a30e?context=explore
+                # WORKDIR /opt/hadoop
+      volumes:
+        - name: hdfs-name-volume
+          persistentVolumeClaim:
+            claimName: namenode-pvc
+        - name: hadoop-config-volume
+          configMap:
+            name: hadoop-config # ConfigMap 이름
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: namenode
+spec:
+  selector:
+    app: namenode
+  ports:
+    - name: web
+      port: 9870
+      targetPort: 9870
+    - name: rpc
+      port: 8020
+      targetPort: 8020
+
+---
+# Datanode Deployment Template
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datanodes
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: datanode
+  template:
+    metadata:
+      labels:
+        app: datanode
+    spec:
+      containers:
+        - name: datanode
+          image: apache/hadoop:3
+          command: ["hdfs", "datanode"]
+          volumeMounts:
+            - name: hadoop-config-volume
+              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
+      volumes:
+        - name: hadoop-config-volume
+          configMap:
+            name: hadoop-config # ConfigMap 이름
+
+---
+# Resourcemanager Deployment and Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resourcemanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resourcemanager
+  template:
+    metadata:
+      labels:
+        app: resourcemanager
+    spec:
+      containers:
+        - name: resourcemanager
+          image: apache/hadoop:3
+          command: ["yarn", "resourcemanager"]
+          envFrom:
+            - configMapRef:
+                name: hadoop-config
+          ports:
+            - containerPort: 8088
+          volumeMounts:
+            - name: hadoop-config-volume
+              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
+      volumes:
+        - name: hadoop-config-volume
+          configMap:
+            name: hadoop-config # ConfigMap 이름
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resourcemanager
+spec:
+  selector:
+    app: resourcemanager
+  ports:
+    - name: web
+      port: 8088
+      targetPort: 8088
+
+---
+# Nodemanager Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodemanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodemanager
+  template:
+    metadata:
+      labels:
+        app: nodemanager
+    spec:
+      containers:
+        - name: nodemanager
+          image: apache/hadoop:3
+          command: ["yarn", "nodemanager"]
+          volumeMounts:
+            - name: hadoop-config-volume
+              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
+      volumes:
+        - name: hadoop-config-volume
+          configMap:
+            name: hadoop-config # ConfigMap 이름
