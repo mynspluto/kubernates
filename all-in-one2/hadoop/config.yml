@@ -51,7 +51,11 @@ data:
     <configuration>
       <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>resourcemanager</value>
+        <value>0.0.0.0</value>
+      </property>
+      <property>
+          <name>yarn.resourcemanager.webapp.address</name>
+          <value>${yarn.resourcemanager.hostname}:8088</value>
       </property>
       <property>
         <name>yarn.nodemanager.pmem-check-enabled</name>

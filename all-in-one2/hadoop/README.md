@@ -122,7 +122,13 @@ at sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:74)
 at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:344)
 ... 10 more
 2024-11-16 08:54:40,810 INFO [shutdown-hook-0] resourcemanager.ResourceManager (LogAdapter.java:info(51)) - SHUTDOWN_MSG:
-/************\*\*\*\*************\*\*\*\*************\*\*\*\*************
-SHUTDOWN_MSG: Shutting down ResourceManager at resourcemanager-6b6fb57bd8-dpkp9/10.244.2.2
-************\*\*\*\*************\*\*\*\*************\*\*\*\*************/
-=> 카프카 ksqldb가 8088를 쓰고 있기 때문으로 추정
+/\***\*\*\*\*\*\*\***\*\*\*\*\***\*\*\*\*\*\*\***\*\*\*\*\***\*\*\*\*\*\*\***\*\*\*\*\***\*\*\*\*\*\*\***
+SHUTDOWN_MSG: Shutting down ResourceManager at resourcemanager-6b6fb57bd8-dpkp9/10.244.2.2 \***\*\*\*\*\*\*\***\*\*\*\*\***\*\*\*\*\*\*\***\*\*\*\*\***\*\*\*\*\*\*\***\*\*\*\*\***\*\*\*\*\*\*\***/
+=> 카프카 ksqldb가 8088를 쓰고 있기 때문으로 추정했으나
+<property>
+<name>yarn.resourcemanager.hostname</name>
+<value>resourcemanager</value>
+</property>
+위의 설정때문에
+resourcemanager:8088로 실행하고 있었음
+<value>0.0.0.0</value>로 수정하여 0.0.0.0:8088로 리소스 매니저 주소 할당하여 실행 성공
