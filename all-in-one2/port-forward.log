@@ -1,2 +1,10 @@
 nohup: 입력 무시
-Error from server (NotFound): pods "kafka-service" not found
+Forwarding from 127.0.0.1:9870 -> 9870
+Forwarding from [::1]:9870 -> 9870
+Handling connection for 9870
+Handling connection for 9870
+Handling connection for 9870
+Handling connection for 9870
+Handling connection for 9870
+Handling connection for 9870
+Handling connection for 9870
