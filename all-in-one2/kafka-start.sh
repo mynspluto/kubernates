@@ -7,8 +7,5 @@ kubectl wait --for=condition=available --timeout=120s deployment/kafka
 #log4j:ERROR Could not read configuration file from URL [file:/opt/kafka/config/tools-log4j.properties]. 
 #java.io.FileNotFoundException: /opt/kafka/config/tools-log4j.properties
 kubectl apply -f ./kafka/svc.yml
-kubectl wait --for=condition=available --timeout=120s svc/kafka-service
-nohup kubectl port-forward kafka-service 9021:9021 -n kafka > port-forward.log 2>&1 &
-# nohup kubectl port-forward svc/kafkarestproxy 8082:8082 -n kafka > port-forward.log 2>&1
-
-
+#kubectl wait --for=condition=Ready --timeout=120s svc/kafka-service
+nohup kubectl port-forward svc/kafka-service 9092:9092 -n kafka > port-forward.log 2>&1 &
