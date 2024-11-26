@@ -1,3 +1,13 @@
+## 설정, 실행
+
+hadoop/config의 파일들을 임의의 경로에 복사
+path: /data/hadoop-config <- 이 부분을 임의의 경로로 변경
+minikube mount /data/hadoop-config:/data/hadoop-config로 임의의 경로
+미니쿠베에 마운트
+./hadoop-restart.sh
+
+## 로그
+
 kubectl logs datanodes-7f467bc4c6-d7nw8
 
 java.io.IOException: Incorrect configuration: namenode address dfs.namenode.servicerpc-address.[] or dfs.namenode.rpc-address.[] is not configured.

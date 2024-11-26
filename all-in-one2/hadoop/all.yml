@@ -1,6 +1,31 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
+  name: hadoop-config-pv
+spec:
+  storageClassName: hadoop-config-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/hadoop-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hadoop-config-pvc
+spec:
+  storageClassName: hadoop-config-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
   name: namenode-pv
 spec:
   capacity:
@@ -54,18 +79,14 @@ spec:
             - name: hdfs-name-volume
               mountPath: /var/lib/hadoop-hdfs/cache/hdfs/dfs/name
             - name: hadoop-config-volume
-              mountPath:
-                /opt/hadoop/etc/hadoop
-                # 원래 /etc/hadoop일텐데 하둡 공식 이미지가 /opt/hadoop에 다운로드를 받아서 이 경로인듯 함
-                # https://hub.docker.com/layers/apache/hadoop/3.4.1/images/sha256-69ffa97339aff768c4e6120c3fb27aa04c121402b1c8158408a5fb5be586a30e?context=explore
-                # WORKDIR /opt/hadoop
+              mountPath: /opt/hadoop/etc/hadoop
       volumes:
         - name: hdfs-name-volume
           persistentVolumeClaim:
             claimName: namenode-pvc
         - name: hadoop-config-volume
-          configMap:
-            name: hadoop-config # ConfigMap 이름
+          persistentVolumeClaim:
+            claimName: hadoop-config-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -104,11 +125,11 @@ spec:
           command: ["hdfs", "datanode"]
           volumeMounts:
             - name: hadoop-config-volume
-              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
+              mountPath: /opt/hadoop/etc/hadoop
       volumes:
         - name: hadoop-config-volume
-          configMap:
-            name: hadoop-config # ConfigMap 이름
+          persistentVolumeClaim:
+            claimName: hadoop-config-pvc
 
 ---
 # Resourcemanager Deployment and Service
@@ -137,11 +158,11 @@ spec:
             - containerPort: 8088
           volumeMounts:
             - name: hadoop-config-volume
-              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
+              mountPath: /opt/hadoop/etc/hadoop
       volumes:
         - name: hadoop-config-volume
-          configMap:
-            name: hadoop-config # ConfigMap 이름
+          persistentVolumeClaim:
+            claimName: hadoop-config-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -179,8 +200,8 @@ spec:
           command: ["yarn", "nodemanager"]
           volumeMounts:
             - name: hadoop-config-volume
-              mountPath: /opt/hadoop/etc/hadoop # ConfigMap 데이터를 이 경로에 마운트
+              mountPath: /opt/hadoop/etc/hadoop/aas
       volumes:
         - name: hadoop-config-volume
-          configMap:
-            name: hadoop-config # ConfigMap 이름
+          persistentVolumeClaim:
+            claimName: hadoop-config-pvc
