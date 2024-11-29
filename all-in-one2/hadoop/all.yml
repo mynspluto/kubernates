@@ -28,12 +28,13 @@ kind: PersistentVolume
 metadata:
   name: namenode-pv
 spec:
+  storageClassName: hadoop-namenode-storage
   capacity:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /var/lib/hadoop-hdfs/cache/hdfs/dfs/name
+    path: /data/hadoop-data
 ---
 # pvc.yaml
 apiVersion: v1
@@ -41,6 +42,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: namenode-pvc
 spec:
+  storageClassName: hadoop-namenode-storage
   accessModes:
     - ReadWriteOnce
   resources:
@@ -65,19 +67,23 @@ spec:
       containers:
         - name: namenode
           image: apache/hadoop:3
-          command: ["/bin/bash", "-c"]
-          args:
-            - |
-              if [ ! -d "/var/lib/hadoop-hdfs/cache/hdfs/dfs/name/current" ]; then
-                echo "Y" | hdfs namenode -format
-              fi
-              hdfs namenode
+          # command: ["/bin/bash", "-c"]
+          # args:
+          #   - |
+          #     if [ ! -d "/tmp/hadoop-hadoop/dfs/name" ]; then
+          #       echo "Y" | hdfs namenode -format
+          #     fi
+          #     hdfs namenode
           ports:
             - containerPort: 9870
             - containerPort: 8020
+            - containerPort: 9000
+            - containerPort: 9864
+            - containerPort: 9867
+            - containerPort: 14000
           volumeMounts:
-            - name: hdfs-name-volume
-              mountPath: /var/lib/hadoop-hdfs/cache/hdfs/dfs/name
+            # - name: hdfs-name-volume
+            #   mountPath: /tmp/hadoop-hadoop/dfs/name
             - name: hadoop-config-volume
               mountPath: /opt/hadoop/etc/hadoop
       volumes:
@@ -96,12 +102,34 @@ spec:
   selector:
     app: namenode
   ports:
-    - name: web
+    - name: namenode-http
+      protocol: TCP
       port: 9870
       targetPort: 9870
-    - name: rpc
+    - name: namenode-8020
+      protocol: TCP
       port: 8020
       targetPort: 8020
+    - name: namenode-rpc
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+    - name: datanode-http
+      protocol: TCP
+      port: 9864
+      targetPort: 9864
+    - name: datanode-ipc
+      protocol: TCP
+      port: 9867
+      targetPort: 9867
+    - name: web-hdfs
+      protocol: TCP
+      port: 14000
+      targetPort: 14000
+    - name: ssh
+      protocol: TCP
+      port: 22
+      targetPort: 22
 
 ---
 # Datanode Deployment Template
@@ -200,7 +228,7 @@ spec:
           command: ["yarn", "nodemanager"]
           volumeMounts:
             - name: hadoop-config-volume
-              mountPath: /opt/hadoop/etc/hadoop/aas
+              mountPath: /opt/hadoop/etc/hadoop
       volumes:
         - name: hadoop-config-volume
           persistentVolumeClaim:

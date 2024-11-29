@@ -1,0 +1,6 @@
+* Mounting host path /data/hadoop-config into VM as /data/hadoop-config   -   - Mount type:    -   - User ID:      doc  -   - Group ID:     doc  -   - 버전:      9p200  -   - 메시지 사이즈: 262  -   - 옵션:      ma  - 연결된 주소: 192.168.49.1:43989
+* Userspace file server: ufs starting
+* Successfully mounted /data/hadoop-data to /data/hadoop-data
+
+* NOTE: This process must stay alive for the mount to be accessible ...
+ble ...
