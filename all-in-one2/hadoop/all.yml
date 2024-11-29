@@ -67,13 +67,16 @@ spec:
       containers:
         - name: namenode
           image: apache/hadoop:3
-          # command: ["/bin/bash", "-c"]
-          # args:
-          #   - |
-          #     if [ ! -d "/tmp/hadoop-hadoop/dfs/name" ]; then
-          #       echo "Y" | hdfs namenode -format
-          #     fi
-          #     hdfs namenode
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              if [ ! -d "/tmp/hadoop-hadoop/dfs/name" ]; then
+                echo "Directory does not exist. Running namenode format."
+                echo "Y" | hdfs namenode -format
+              else
+                echo "Directory exists. Starting namenode."
+              fi
+              hdfs namenode && cd /opt/hadoop/sbin && ./start-dfs.sh
           ports:
             - containerPort: 9870
             - containerPort: 8020
