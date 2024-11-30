@@ -22,11 +22,14 @@
     <value>1</value>
   </property>
   <property>
-    <name>dfs.namenode.rpc-address</name>
-    <value>0.0.0.0:8020</value>
+    <name>dfs.namenode.http-address</name>
+    <value>0.0.0.0:9870</value>
+    <description>
+      The address and the base port where the dfs namenode web ui will listen on.
+    </description>
   </property>
   <property>
-    <name>dfs.namenode.http-address</name>
-    <value>0.0.0.0:50070</value>
+    <name>dfs.namenode.rpc-address</name>
+    <value>0.0.0.0:8020</value>
   </property>
 </configuration>

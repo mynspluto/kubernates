@@ -1,11 +1,10 @@
-* Mounting host path /data/hadoop-data into VM as /data/hadoop-data ...
-  - Mount type:   9p
+* Mounting host path /data/hadoop-config into VM as /data/hadoop-config   - Mount type:   9p
   - User ID:      docker
   - Group ID:     docker
   - 버전:      9p2000.L
   - 메시지 사이즈: 262144
   - 옵션:      map[]
-  - 연결된 주소: 192.168.49.1:39377
+  - 연결된 주소: 192.168.49.1:37499
 * Userspace file server: ufs starting
 * Su* Successfully mounted /data/hadoop-config to /data/hadoop
 * NOTE: * NOTE: This process must stay alive for the mount to be accessible ...

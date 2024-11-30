@@ -76,7 +76,9 @@ spec:
               else
                 echo "Directory exists. Starting namenode."
               fi
-              hdfs namenode && cd /opt/hadoop/sbin && ./start-dfs.sh
+              hdfs namenode &
+              sleep 5
+              hdfs datanode
           ports:
             - containerPort: 9870
             - containerPort: 8020
@@ -133,106 +135,105 @@ spec:
       protocol: TCP
       port: 22
       targetPort: 22
+# ---
+# # Datanode Deployment Template
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: datanodes
+# spec:
+#   replicas: 3
+#   selector:
+#     matchLabels:
+#       app: datanode
+#   template:
+#     metadata:
+#       labels:
+#         app: datanode
+#     spec:
+#       containers:
+#         - name: datanode
+#           image: apache/hadoop:3
+#           command: ["hdfs", "datanode"]
+#           volumeMounts:
+#             - name: hadoop-config-volume
+#               mountPath: /opt/hadoop/etc/hadoop
+#       volumes:
+#         - name: hadoop-config-volume
+#           persistentVolumeClaim:
+#             claimName: hadoop-config-pvc
 
----
-# Datanode Deployment Template
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: datanodes
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: datanode
-  template:
-    metadata:
-      labels:
-        app: datanode
-    spec:
-      containers:
-        - name: datanode
-          image: apache/hadoop:3
-          command: ["hdfs", "datanode"]
-          volumeMounts:
-            - name: hadoop-config-volume
-              mountPath: /opt/hadoop/etc/hadoop
-      volumes:
-        - name: hadoop-config-volume
-          persistentVolumeClaim:
-            claimName: hadoop-config-pvc
+# ---
+# # Resourcemanager Deployment and Service
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: resourcemanager
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: resourcemanager
+#   template:
+#     metadata:
+#       labels:
+#         app: resourcemanager
+#     spec:
+#       containers:
+#         - name: resourcemanager
+#           image: apache/hadoop:3
+#           command: ["yarn", "resourcemanager"]
+#           envFrom:
+#             - configMapRef:
+#                 name: hadoop-config
+#           ports:
+#             - containerPort: 8088
+#           volumeMounts:
+#             - name: hadoop-config-volume
+#               mountPath: /opt/hadoop/etc/hadoop
+#       volumes:
+#         - name: hadoop-config-volume
+#           persistentVolumeClaim:
+#             claimName: hadoop-config-pvc
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: resourcemanager
+# spec:
+#   # type: NodePort
+#   selector:
+#     app: resourcemanager
+#   ports:
+#     - name: web
+#       port: 8088
+#       targetPort: 8088
+#       # nodePort: 30000
 
----
-# Resourcemanager Deployment and Service
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: resourcemanager
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: resourcemanager
-  template:
-    metadata:
-      labels:
-        app: resourcemanager
-    spec:
-      containers:
-        - name: resourcemanager
-          image: apache/hadoop:3
-          command: ["yarn", "resourcemanager"]
-          envFrom:
-            - configMapRef:
-                name: hadoop-config
-          ports:
-            - containerPort: 8088
-          volumeMounts:
-            - name: hadoop-config-volume
-              mountPath: /opt/hadoop/etc/hadoop
-      volumes:
-        - name: hadoop-config-volume
-          persistentVolumeClaim:
-            claimName: hadoop-config-pvc
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: resourcemanager
-spec:
-  # type: NodePort
-  selector:
-    app: resourcemanager
-  ports:
-    - name: web
-      port: 8088
-      targetPort: 8088
-      # nodePort: 30000
-
----
-# Nodemanager Deployment
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nodemanager
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: nodemanager
-  template:
-    metadata:
-      labels:
-        app: nodemanager
-    spec:
-      containers:
-        - name: nodemanager
-          image: apache/hadoop:3
-          command: ["yarn", "nodemanager"]
-          volumeMounts:
-            - name: hadoop-config-volume
-              mountPath: /opt/hadoop/etc/hadoop
-      volumes:
-        - name: hadoop-config-volume
-          persistentVolumeClaim:
-            claimName: hadoop-config-pvc
+# ---
+# # Nodemanager Deployment
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: nodemanager
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: nodemanager
+#   template:
+#     metadata:
+#       labels:
+#         app: nodemanager
+#     spec:
+#       containers:
+#         - name: nodemanager
+#           image: apache/hadoop:3
+#           command: ["yarn", "nodemanager"]
+#           volumeMounts:
+#             - name: hadoop-config-volume
+#               mountPath: /opt/hadoop/etc/hadoop
+#       volumes:
+#         - name: hadoop-config-volume
+#           persistentVolumeClaim:
+#             claimName: hadoop-config-pvc
