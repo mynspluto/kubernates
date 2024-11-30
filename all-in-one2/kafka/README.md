@@ -9,7 +9,7 @@ kubectl apply -f svc.yml
 # 테스트
 
 cd /home/mynspluto/다운로드/kafka_2.13-3.9.0/bin
-./kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic
+./kafka-topics.sh --create --topic test-topic --bootstrap-server localhost:9092
 ./kafka-topics.sh --bootstrap-server localhost:9092 --list
 
 # 에러

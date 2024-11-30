@@ -1,6 +1,5 @@
-# kafka-deployment.yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: kafka
 spec:
@@ -15,6 +14,6 @@ spec:
     spec:
       containers:
         - name: kafka
-          image: apache/kafka-native:latest
+          image: apache/kafka:3.9.0
           ports:
             - containerPort: 9092

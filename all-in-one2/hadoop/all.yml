@@ -88,7 +88,7 @@ spec:
             - containerPort: 14000
           volumeMounts:
             # - name: hdfs-name-volume
-            #   mountPath: /tmp/hadoop-hadoop/dfs/name
+            #   mountPath: /tmp/hadoop-hadoop/dfs/data
             - name: hadoop-config-volume
               mountPath: /opt/hadoop/etc/hadoop
       volumes:
