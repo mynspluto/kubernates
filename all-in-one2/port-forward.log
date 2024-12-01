@@ -1,2 +1,4 @@
-Unable to listen on port 9092: Listeners failed to create with the following errors: [unable to create listener: Error listen tcp4 127.0.0.1:9092: bind: address already in use unable to create listener: Error listen tcp6 [::1]:9092: bind: address already in use]
-error: unable to listen on any of the requested ports: [{9092 9092}]
+Forwarding from 127.0.0.1:9092 -> 9092
+Forwarding from [::1]:9092 -> 9092
+Handling connection for 9092
+Handling connection for 9092

@@ -8,7 +8,6 @@ kubectl apply -f ./kafka/dep.yml
 kubectl wait --for=jsonpath='{.status.phase}'=Running --timeout=120s pod/kafka-0 # kubectl get pod kafka-0 -o json
 # TODO 특정 로그(카프카 실행완료)가 쌓이는걸 확인하고 실행
 
-
 kubectl exec -it kafka-0 -- /opt/kafka/bin/kafka-topics.sh --create --topic test-topic --bootstrap-server localhost:9092
 
 #deploy 생성전에 svc 생성되는 경우 

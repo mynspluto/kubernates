@@ -10,8 +10,9 @@ cp -r ./hadoop/config/* /data/hadoop-config
 nohup minikube mount /data/hadoop-config:/data/hadoop-config > mount.log 2>&1 &
 nohup minikube mount /data/hadoop-data:/data/hadoop-data > mount.log 2>&1 &
 
-kubectl apply -f ./hadoop/config.yml --namespace=hadoop
 kubectl apply -f ./hadoop/all.yml --namespace=hadoop
-kubectl wait --for=condition=available --timeout=120s deployment/namenode 
 
-nohup kubectl port-forward service/namenode 9870 -n hadoop > port-forward.log 2>&1 &
+# kubectl get pod hadoop-0 -o json
+#kubectl wait --for=condition=Ready pod/hadoop-0 --timeout=120s
+kubectl wait --for=jsonpath='{.status.phase}'=Running --timeout=120s pod/hadoop-0
+nohup kubectl port-forward service/hadoop-service 9870 -n hadoop > port-forward.log 2>&1 &

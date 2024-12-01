@@ -26,7 +26,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: namenode-pv
+  name: hadoop-pv
 spec:
   storageClassName: hadoop-namenode-storage
   capacity:
@@ -40,7 +40,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: namenode-pvc
+  name: hadoop-pvc
 spec:
   storageClassName: hadoop-namenode-storage
   accessModes:
@@ -51,21 +51,21 @@ spec:
 ---
 # Namenode Deployment and Service
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: namenode
+  name: hadoop
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: namenode
+      app: hadoop
   template:
     metadata:
       labels:
-        app: namenode
+        app: hadoop
     spec:
       containers:
-        - name: namenode
+        - name: hadoop
           image: apache/hadoop:3
           command: ["/bin/bash", "-c"]
           args:
@@ -94,7 +94,7 @@ spec:
       volumes:
         - name: hdfs-name-volume
           persistentVolumeClaim:
-            claimName: namenode-pvc
+            claimName: hadoop-pvc
         - name: hadoop-config-volume
           persistentVolumeClaim:
             claimName: hadoop-config-pvc
@@ -102,10 +102,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: namenode
+  name: hadoop-service
 spec:
   selector:
-    app: namenode
+    app: hadoop
   ports:
     - name: namenode-http
       protocol: TCP
