@@ -1,0 +1,8 @@
+apache-airflow-providers-apache-kafka
+apache-airflow
+pendulum
+yfinance
+pandas
+confluent-kafka
+requests
+datetime
