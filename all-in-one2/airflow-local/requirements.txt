@@ -6,3 +6,4 @@ pandas
 confluent-kafka
 requests
 datetime
+logging
