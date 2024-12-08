@@ -4,9 +4,5 @@
   - Group ID:     docker
   - 버전:      9p2000.L
   - 메시지 사이즈: 262144
-  - 옵션:      map[]
-  - 연결된 주소: 192.168.49.1:43291
-* Userspace file server: ufs starting
-* Successfully mounted /data/hadoop-data to /data/hadoop-data
-
-* NOTE: * NOTE: This process must stay alive for the mount to be accessible ...
+  -   - 옵션:      ma  -   - 연결된 주소: 192.168.49.1:46* Us* Userspace file servufs ufs start* Su* Successfully mounted /data/hadoop-config to /data/hadoop-* NOTE:
+* NOTE: This process must stay alive for the mount to be accessible ...

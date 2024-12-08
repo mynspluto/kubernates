@@ -18,7 +18,7 @@ from airflow.providers.apache.kafka.operators.produce import ProduceToTopicOpera
 from airflow.providers.apache.kafka.sensors.kafka import AwaitMessageSensor
 
 # 현재 터미널 세션기준으로 상대 위치 정해지는듯 함
-local_path = './stock_data'
+local_path = '/home/mynspluto/airflow'
 webhdfs_url = 'http://localhost:9870/webhdfs/v1'
 
 # 주가 데이터를 수집할 종목 리스트
