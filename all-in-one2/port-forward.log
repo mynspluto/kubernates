@@ -1,4 +1,3 @@
-Unable to listen on port 9864: Listeners failed to create with the following errors: [unable to create listener: Error listen tcp4 127.0.0.1:9864: bind: address already in use unable to create listener: Error listen tcp6 [::1]:9864: bind: address already in use]
-error: unable to listen on any of the requested ports: [{9864 9864}]
-388 portforward.go:413] "Unhandled Error" err="an error occurred forwarding 9870 -> 9870: error forwarding port 9870 to pod f8e3423d627bc2a2fa27d1390822e70c6a83433ae48706f1815839a5b4568605, uid : Error response from daemon: No such container: f8e3423d627bc2a2fa27d1390822e70c6a83433ae48706f1815839a5b4568605"
-error: lost connection to pod
+Forwarding from 127.0.0.1:9864 -> 9864
+Forwarding from [::1]:9864 -> 9864
+Handling connection for 9864

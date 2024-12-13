@@ -5,7 +5,7 @@
   - 버전:      9p2000.L
   - 메시지 사이즈: 262144
   - 옵션:      map[]
-  - 연결된 주소: 192.168.49.1:33801
+  - 연결된 주소: 192.168.49.1:34043
 * Userspace file server: ufs starting
 * Successfully mounted /data/hadoop-data to /data/hadoop-data
 

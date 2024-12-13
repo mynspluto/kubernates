@@ -3,4 +3,20 @@
         <name>fs.defaultFS</name>
         <value>hdfs://0.0.0.0:9000</value>
     </property>
+
+    <property>
+        <name>dfs.datanode.http.address</name>
+        <value>0.0.0.0:9864</value>
+        <description>
+            The datanode http server address and port.
+        </description>
+    </property>
+
+    <property>
+        <name>dfs.datanode.ipc.address</name>
+        <value>0.0.0.0:9867</value>
+        <description>
+            The datanode ipc server address and port.
+        </description>
+    </property>
 </configuration>
