@@ -19,7 +19,8 @@ from airflow.providers.apache.kafka.sensors.kafka import AwaitMessageSensor
 
 # 현재 터미널 세션기준으로 상대 위치 정해지는듯 함
 local_path = '/home/mynspluto/airflow'
-webhdfs_url = 'http://localhost:9870/webhdfs/v1'
+#webhdfs_url = 'http://localhost:9870/webhdfs/v1'
+webhdfs_url = 'http://localhost:9864/webhdfs/v1'
 
 # 주가 데이터를 수집할 종목 리스트
 tickers = ['^IXIC']
@@ -42,7 +43,7 @@ def upload_to_hadoop(local_path):
                 local_file_path = os.path.join(root, file)
                 relative_path = os.path.relpath(local_file_path, local_path)
                 hdfs_file_path = f"/{relative_path}"  # HDFS 경로
-                upload_url = f"{webhdfs_url}{hdfs_file_path}?op=CREATE&overwrite=true"
+                upload_url = f"{webhdfs_url}{hdfs_file_path}?op=CREATE&overwrite=true&namenoderpcaddress=localhost:9000"
                 
                 logging.info(f"Uploading file: {local_file_path} to URL: {upload_url}")
                 
@@ -54,7 +55,7 @@ def upload_to_hadoop(local_path):
         raise
 
 with DAG(
-    "dag-test",
+    "stock-predict",
     default_args={
         "owner": "airflow",
         "depend_on_past": False,
